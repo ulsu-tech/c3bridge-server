@@ -12,7 +12,7 @@ The C3 Bridge Interface Server is a lightweight network application that allows 
 * It provides the Discovery Protocol for easy identification of the control system in the network.
 
 ## License
-Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+Copyright (c) 2020 Dmitry Lavygin (vdm.inbox@gmail.com)
 
 S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
 
