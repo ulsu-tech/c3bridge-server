@@ -1,3 +1,4 @@
+![C3 Bridge Interface](https://github.com/ulsu-tech/c3bridge-server/raw/master/artwork/logo.png)
 # C3 Bridge Interface Server
 The C3 Bridge Interface Server is a lightweight network application that allows remote clients to execute requests to the KUKA Cross 3 subsystem and return responses. The application provides advanced functionality and high performance.
 
@@ -27,3 +28,8 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
 IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+## Donate
+If you found this software useful, you can thank the author with donations via
+
+[![PayPal](https://github.com/ulsu-tech/c3bridge-server/raw/master/artwork/donate.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=vdm.inbox@gmail.com&lc=EN&item_name=C3BridgeInterface&no_note=0&currency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted) [![Yandex.Money](https://github.com/ulsu-tech/c3bridge-server/raw/master/artwork/donate_yandex.png)](https://money.yandex.ru/to/4100111653323774)
