@@ -1,5 +1,8 @@
 # Prerequisites
 *.d
+*.user
+.vs
+source/*.aps
 
 # Compiled Object files
 *.slo

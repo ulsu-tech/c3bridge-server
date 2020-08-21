@@ -1,0 +1,270 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RT_MANIFEST
+//
+
+1                       RT_MANIFEST             "../resources/main.manifest"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University"
+            VALUE "FileDescription", "C3 Bridge Interface Server"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "InternalName", "C3BRIDGE"
+            VALUE "LegalCopyright", "Copyright (C) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>"
+            VALUE "OriginalFilename", "C3BRIDGE.EXE"
+            VALUE "ProductName", "C3 Bridge Interface"
+            VALUE "ProductVersion", "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDM_TRAY MENU
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "C3 Bridge Interface Server",  IDM_TRAY_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "Exit",                        IDM_TRAY_EXIT
+    END
+END
+
+IDW_MAIN MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "E&xit\tCtrl+Q",               IDM_FILE_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "Copy\tCtrl+C",                IDM_EDIT_COPY, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "Clear Log",                   IDM_EDIT_CLEAR
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About...\tF1",               IDM_HELP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+#ifdef VS_RC_60   // For Visual Studio 6
+IDW_MAIN                ICON                    "../resources/legacy.ico"
+#else
+IDW_MAIN                ICON                    "../resources/main.ico"
+#endif
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDW_MAIN ACCELERATORS
+BEGIN
+    "Q",            IDM_FILE_EXIT,          VIRTKEY, CONTROL, NOINVERT
+    VK_F1,          IDM_HELP_ABOUT,         VIRTKEY, NOINVERT
+    "C",            IDM_EDIT_COPY,          VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDW_ABOUT DIALOGEX 0, 0, 300, 260
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About C3 Bridge Interface"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    CONTROL         IDB_LOGO,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE | SS_REALSIZEIMAGE,0,0,300,54,WS_EX_TRANSPARENT
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ | SS_SUNKEN,0,54,302,1
+    LTEXT           "",IDC_TITLE,8,63,292,8
+    LTEXT           "",IDC_INFO,8,71,292,45
+    LTEXT           "",IDC_STATIC,8,116,284,114,0,WS_EX_STATICEDGE
+    LTEXT           "",IDC_DISCLAIMER,12,120,276,106
+    DEFPUSHBUTTON   "OK",IDOK,242,238,50,14,WS_GROUP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDW_ABOUT, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 236
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_LOGO                BITMAP                  "../resources/logo.bmp"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDW_MAIN                "C3 Bridge Interface Server"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_FORMAT_DATETIME     "[%x %X] "
+    IDS_ERROR_TCP_SERVER_CREATE 
+                            "[ERROR] Unable to initialize the main server socket."
+    IDS_ERROR_TCP_SERVER_BIND 
+                            "[ERROR] Unable to bind the main server socket on port %hu."
+    IDS_ERROR_TCP_SERVER_LISTEN 
+                            "[ERROR] Unable to start listening to the main server socket."
+    IDS_ERROR_TCP_SERVER_ASYNC 
+                            "[ERROR] Unable to start an asynchronous event listener on the main server socket."
+    IDS_ERROR_UDP_SERVER_CREATE 
+                            "[ERROR] Unable to initialize the discovery server socket."
+    IDS_ERROR_UDP_SERVER_BIND 
+                            "[ERROR] Unable to bind the discovery server socket on port %hu."
+    IDS_ERROR_UDP_SERVER_ASYNC 
+                            "[ERROR] Unable to start an asynchronous event listener on the discovery server socket."
+    IDS_ERROR_UDP_LEGACY_SERVER_CREATE 
+                            "[ERROR] Unable to initialize the discovery server socket (legacy)."
+    IDS_ERROR_UDP_LEGACY_SERVER_BIND 
+                            "[ERROR] Unable to bind the discovery server socket on port %hu (legacy)."
+    IDS_ERROR_UDP_LEGACY_SERVER_ASYNC 
+                            "[ERROR] Unable to start an asynchronous event listener on the discovery server socket (legacy)."
+END
+
+STRINGTABLE
+BEGIN
+    IDS_NOTICE_TCP_SERVER_STARTED 
+                            "C3 Bridge Interface Server is running and available at '%s:%hu'."
+    IDS_NOTICE_UDP_SERVER_STARTED 
+                            "The discovery server is listening on port %hu."
+    IDS_NOTICE_UDP_LEGACY_SERVER_STARTED 
+                            "The discovery server (legacy) is listening on port %hu."
+    IDS_ABOUT_INFO          "Version %u.%u %s\r\n\r\nCopyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>\r\nS.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.\r\nAll rights reserved."
+    IDS_ABOUT_INFO_OPEN_SOURCE "(Open Source)"
+    IDS_ABOUT_INFO_PROPRIETARY "(Proprietary)"
+    IDS_ABOUT_DISCLAIMER    "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ""AS IS"" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
