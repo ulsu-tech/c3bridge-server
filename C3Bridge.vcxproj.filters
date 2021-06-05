@@ -5,143 +5,36 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="source\resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\application.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\mainwindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\client.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ringbuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\cross3krc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\cross3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ringstream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\bufferstream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\view.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\bstring.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utilities.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\c3bi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\settings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\proxy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\aboutdialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\callbackerrorimplementation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="source\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\application.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\mainwindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\client.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ringbuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\cross3krc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\cross3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ringstream.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\bufferstream.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\view.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\client_variables.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\bstring.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utilities.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\client_file.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\settings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\proxy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\aboutdialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\callbackerrorimplementation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\client_cross.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <Filter Include="Source Files\System">
+      <UniqueIdentifier>{47377786-3dad-4c56-a844-5d07919c33c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Memory">
+      <UniqueIdentifier>{a3b74fb6-8174-49d7-ad77-279b749a9359}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Network">
+      <UniqueIdentifier>{bef98e15-11a1-4dd6-a9f0-7f22ffb2a86b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Proxy">
+      <UniqueIdentifier>{b6c2ddf4-3e31-478a-9f0b-3d7043e0f237}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Cross 3">
+      <UniqueIdentifier>{e633290d-1ecc-4ba6-8be8-405c7a4c40c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Network Handlers">
+      <UniqueIdentifier>{8a5e3a8f-0039-4d31-92c7-678ac068f2de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Application">
+      <UniqueIdentifier>{733dd7b4-be2c-4cd6-990f-101cb91080b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="source\resources.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Manifest Include="resources\main.manifest" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\main.ico">
@@ -150,5 +43,152 @@
     <Image Include="resources\logo.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\main.cpp">
+      <Filter>Source Files\System</Filter>
+    </ClCompile>
+    <ClCompile Include="source\stdafx.cpp">
+      <Filter>Source Files\System</Filter>
+    </ClCompile>
+    <ClCompile Include="source\aboutdialog.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="source\application.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="source\mainwindow.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="source\usermessage.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="source\view.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="source\bstring.cpp">
+      <Filter>Source Files\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="source\memoryallocator.cpp">
+      <Filter>Source Files\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="source\client.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="source\tcpserver.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="source\udpserver.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="source\messagebuilder.cpp">
+      <Filter>Source Files\Proxy</Filter>
+    </ClCompile>
+    <ClCompile Include="source\messagereader.cpp">
+      <Filter>Source Files\Proxy</Filter>
+    </ClCompile>
+    <ClCompile Include="source\proxy.cpp">
+      <Filter>Source Files\Proxy</Filter>
+    </ClCompile>
+    <ClCompile Include="source\callbackerrorimplementation.cpp">
+      <Filter>Source Files\Cross 3</Filter>
+    </ClCompile>
+    <ClCompile Include="source\cross3.cpp">
+      <Filter>Source Files\Cross 3</Filter>
+    </ClCompile>
+    <ClCompile Include="source\cross3krc.cpp">
+      <Filter>Source Files\Cross 3</Filter>
+    </ClCompile>
+    <ClCompile Include="source\handlers\client_control.cpp">
+      <Filter>Source Files\Network Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\handlers\client_cross.cpp">
+      <Filter>Source Files\Network Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\handlers\client_file.cpp">
+      <Filter>Source Files\Network Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\handlers\client_service.cpp">
+      <Filter>Source Files\Network Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\handlers\client_variables.cpp">
+      <Filter>Source Files\Network Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\log.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="source\settings.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\resource.h">
+      <Filter>Source Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="source\stdafx.h">
+      <Filter>Source Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="source\targetver.h">
+      <Filter>Source Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="source\aboutdialog.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="source\application.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="source\mainwindow.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="source\usermessage.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="source\view.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="source\bstring.h">
+      <Filter>Source Files\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="source\memoryallocator.h">
+      <Filter>Source Files\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="source\client.h">
+      <Filter>Source Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\tcpserver.h">
+      <Filter>Source Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\udpserver.h">
+      <Filter>Source Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\messagebuilder.h">
+      <Filter>Source Files\Proxy</Filter>
+    </ClInclude>
+    <ClInclude Include="source\messagereader.h">
+      <Filter>Source Files\Proxy</Filter>
+    </ClInclude>
+    <ClInclude Include="source\proxy.h">
+      <Filter>Source Files\Proxy</Filter>
+    </ClInclude>
+    <ClInclude Include="source\callbackerrorimplementation.h">
+      <Filter>Source Files\Cross 3</Filter>
+    </ClInclude>
+    <ClInclude Include="source\cross3.h">
+      <Filter>Source Files\Cross 3</Filter>
+    </ClInclude>
+    <ClInclude Include="source\cross3krc.h">
+      <Filter>Source Files\Cross 3</Filter>
+    </ClInclude>
+    <ClInclude Include="source\log.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="source\settings.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="resources\main.manifest">
+      <Filter>Resource Files</Filter>
+    </Manifest>
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -39,6 +39,8 @@
 View::View()
     : _aveCharWidth(0)
     , _maxTextWidth(0)
+    , _lineCount(0)
+    , _lineLimit(0)
 {
 }
 
@@ -48,6 +50,13 @@ View::~View()
 
 int View::AddString(LPCTSTR pString)
 {
+    if (_lineLimit > 0 && _lineCount >= _lineLimit)
+    {
+        _lineCount = 0;
+        _maxTextWidth = 0;
+        CListBox::ResetContent();
+    }
+
     Win32xx::CSize size = GetDC().GetTextExtentPoint32(pString);
 
     if (size.cx > _maxTextWidth)
@@ -56,11 +65,14 @@ int View::AddString(LPCTSTR pString)
         SetHorizontalExtent(_maxTextWidth + _aveCharWidth);
     }
 
+    _lineCount++;
+
     return CListBox::AddString(pString);
 }
 
 void View::ResetContent()
 {
+    _lineCount = 0;
     _maxTextWidth = 0;
     SetHorizontalExtent(_maxTextWidth);
     CListBox::ResetContent();
@@ -136,7 +148,8 @@ void View::CopyToClipboard()
     if (!::OpenClipboard(GetHwnd()) || !::EmptyClipboard())
         return;
 
-    HGLOBAL global = ::GlobalAlloc(GMEM_MOVEABLE, (content.length() + 1) * sizeof(TCHAR));
+    HGLOBAL global = ::GlobalAlloc(GMEM_MOVEABLE,
+        (content.length() + 1) * sizeof(TCHAR));
 
     if (global)
     {
@@ -144,7 +157,8 @@ void View::CopyToClipboard()
 
         if (globalString)
         {
-            memcpy(globalString, &content[0], (content.length() + 1) * sizeof(TCHAR));
+            memcpy(globalString, &content[0],
+                (content.length() + 1) * sizeof(TCHAR));
 
             ::GlobalUnlock(global);
 
@@ -195,6 +209,14 @@ int View::SelectedItemsCount()
 
         return 1;
     }
+}
+
+void View::setLineLimit(uint32_t limit)
+{
+    _lineLimit = limit;
+
+    if (_lineLimit > 0 && _lineLimit >= _lineCount)
+        ResetContent();
 }
 
 void View::OnAttach()

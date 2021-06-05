@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -35,71 +35,144 @@
 #define CLIENT_H
 
 
-#include "ringbuffer.h"
-
-
-class RingStream;
+class MessageReader;
+class MessageBuilder;
 
 
 class Client : public Win32xx::CSocket
 {
 public:
-    Client();
+    static void registerHandlers();
+
+    Client(HWND window, UINT messageId, uint32_t id = 0);
     virtual ~Client();
 
-    size_t bytesAvailable() const;
+    void checkTimeout(uint32_t elapsed);
+    void setEvents(long events);
+    void setIdleTimeout(uint32_t value);
+    void setMessageTimeout(uint32_t value);
 
-    virtual void OnDisconnect();
+    virtual void OnDisconnect(uint16_t reason);
     virtual void OnReceive();
     virtual void OnSend();
 
 private:
     // Variables Handling
-    void handleReadVariableAscii(WORD id, RingStream& stream);
-    void handleWriteVariableAscii(WORD id, RingStream& stream);
-    void handleReadVariable(WORD id, RingStream& stream);
-    void handleWriteVariable(WORD id, RingStream& stream);
-    void handleReadMultiple(WORD id, RingStream& stream);
-    void handleWriteMultiple(WORD id, RingStream& stream);
+    void handleReadVariableAscii(MessageReader& stream, MessageBuilder& output);
+    void handleWriteVariableAscii(MessageReader& stream, MessageBuilder& output);
+    void handleReadVariable(MessageReader& stream, MessageBuilder& output);
+    void handleWriteVariable(MessageReader& stream, MessageBuilder& output);
+    void handleReadMultiple(MessageReader& stream, MessageBuilder& output);
+    void handleWriteMultiple(MessageReader& stream, MessageBuilder& output);
 
     // Program Handling
-    void handleProgramState(WORD id, RingStream& stream);
+    void handleProgramState(MessageReader& stream, MessageBuilder& output);
 
     // Motion Handling
-    void handleMotion(WORD id, RingStream& stream);
+    void handleMotion(MessageReader& stream, MessageBuilder& output);
 
     // KCP Key Handling
-    void handleKcpAction(WORD id, RingStream& stream);
+    void handleKcpAction(MessageReader& stream, MessageBuilder& output);
 
     // Proxy Information Handling
-    void handleProxyInfo(WORD id, RingStream& stream);
-    void handleProxyFeatures(WORD id, RingStream& stream);
+    void handleProxyInfo(MessageReader& stream, MessageBuilder& output);
+    void handleProxyFeatures(MessageReader& stream, MessageBuilder& output);
+    void handleBenchmark(MessageReader& stream, MessageBuilder& output);
 
     // File Handling
-    void handleFileSetAttribute(WORD id, RingStream& stream);
-    void handleFileNameList(WORD id, RingStream& stream);
-    void handleFileCreate(WORD id, RingStream& stream);
-    void handleFileDelete(WORD id, RingStream& stream);
-    void handleFileCopy(WORD id, RingStream& stream);
-    void handleFileMove(WORD id, RingStream& stream);
-    void handleFileGetProperties(WORD id, RingStream& stream);
-    void handleFileFileGetFullName(WORD id, RingStream& stream);
-    void handleFileFileGetKrcName(WORD id, RingStream& stream);
-    void handleFileFileWriteContent(WORD id, RingStream& stream);
-    void handleFileFileReadContent(WORD id, RingStream& stream);
+    void handleFileSetAttribute(MessageReader& stream, MessageBuilder& output);
+    void handleFileNameList(MessageReader& stream, MessageBuilder& output);
+    void handleFileCreate(MessageReader& stream, MessageBuilder& output);
+    void handleFileDelete(MessageReader& stream, MessageBuilder& output);
+    void handleFileCopy(MessageReader& stream, MessageBuilder& output);
+    void handleFileMove(MessageReader& stream, MessageBuilder& output);
+    void handleFileGetProperties(MessageReader& stream,
+        MessageBuilder& output);
+    void handleFileGetFullName(MessageReader& stream, MessageBuilder& output);
+    void handleFileGetKrcName(MessageReader& stream, MessageBuilder& output);
+    void handleFileWriteContent(MessageReader& stream, MessageBuilder& output);
+    void handleFileReadContent(MessageReader& stream, MessageBuilder& output);
+    void handleFileDummy(MessageReader& stream, MessageBuilder& output);
 
     // CrossCommEXE Functions Handling
-    void handleCrossConfirmAll(WORD id, RingStream& stream);
+    void handleCrossConfirmAll(MessageReader& stream, MessageBuilder& output);
 
 private:
     enum
     {
-        InputBufferSize = 66000,
-        OutputBufferSize = 1024
+        HeaderSize        = 5,
+        MinimumSize       = 1024,
+        AbyssSize         = 256,
+        TotalHandlers     = 256,
+        SafePayloadSize   = 64512 // 63 KiB
     };
 
-    RingBuffer _inputBuffer;
-    std::vector<char> _outputBuffer;
+    enum Error
+    {
+        ErrorNone         = 0,
+        ErrorTimeout      = 60000,
+        ErrorHeader       = 60001,
+        ErrorInputBuffer  = 60002,
+        ErrorOutputBuffer = 60003,
+        ErrorBuildMessage = 60004,
+        ErrorUnknownInput = 60005
+    };
+
+    struct Input
+    {
+        uint16_t tag;
+        uint16_t size;
+        uint8_t  type;
+
+        char*    buffer;
+        char     header[HeaderSize];
+        size_t   offset;
+
+        bool     headerReceived;
+    };
+
+    struct Output
+    {
+        char*    buffer;
+        size_t   offset;
+        size_t   size;
+
+        bool     completed;
+    };
+
+    typedef void (Client::*Handler)(MessageReader& stream,
+        MessageBuilder& output);
+
+private:
+    size_t bytesAvailable() const;
+    void performDisconnect(uint16_t reason);
+    void dropPendingData();
+    void reply(MessageBuilder& message);
+
+    bool onHeader();
+    bool onCollect();
+
+private:
+    static Handler _handlers[TotalHandlers];
+
+    HWND _window;
+    UINT _messageId;
+
+    Input  _input;
+    Output _output;
+
+    std::vector<uint8_t> _fileIn;
+    std::vector<uint8_t> _fileOut;
+
+    uint32_t _id;
+    uint32_t _timeout;
+    uint32_t _timeoutIdle;
+    uint32_t _timeoutMessage;
+    uint32_t _elapsed;
+
+    bool _ignoreEvents;
+
+    friend class Proxy;
 };
 
 

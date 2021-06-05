@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -80,11 +80,11 @@ namespace C3BI
         // Proxy Information Handling
         CommandProxyInfo                  = 13,
         CommandProxyFeatures              = 14,
+        CommandProxyInfoEx                = 15,
+        CommandProxyCrossInfo             = 16,
+        CommandProxyBenchmark             = 17,
 
         // Reserved
-        CommandReserved15                 = 15,
-        CommandReserved16                 = 16,
-        CommandReserved17                 = 17,
         CommandReserved18                 = 18,
         CommandReserved19                 = 19,
 
@@ -243,6 +243,16 @@ namespace C3BI
         KcpActionStop                     = 2,
         KcpActionMove                     = 3,
         KcpActionMove6D                   = 4
+    };
+
+    enum FileIoOperation
+    {
+        FileIoNone                        = 0,
+        FileIoBegin                       = 1,
+        FileIoData                        = 2,
+        FileIoGetSize                     = 3,
+        FileIoEnd                         = 4,
+        FileIoGetChecksum                 = 5
     };
 }
 

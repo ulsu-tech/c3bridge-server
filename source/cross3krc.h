@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -110,6 +110,37 @@ typedef enum
     eMessageTypeWait = 32,
     eMessageTypeDialog = 256
 } 	EKDialogType;
+
+typedef enum
+{
+    eListFlagNone = 0,
+    eListFlagRecursive = 1,
+    eListFlagExpand = 2,
+    eListFlagLong = 4,
+    eListFlagOldLong = 8,
+    eListFlagNoPFC = 16,
+    eListFlagPFCAsFile = 32,
+    eListFlagZIPAsFile = 64
+} 	EKItemListFlag;
+
+typedef enum
+{
+    eCopyFlagNone = 0,
+    eCopyFlagArchive = 1,
+    eCopyFlagModify = 3,
+    eCopyFlagContinue = 4,
+    eCopyFlagRecursive = 8,
+    eCopyFlagRefresh = 16,
+    eCopyFlagUpdate = 48,
+    eCopyFlagOverwriteExist = 64,
+    eCopyFlagNoDirEntries = 128,
+    eCopyFlagJunkDir = 256,
+    eCopyFlagForceBinary = 512,
+    eCopyFlagForceText = 1024,
+    eCopyFlagNoVersionCheck = 2048,
+    eCopyFlagOverwriteReadonly = 4096,
+    eCopyFlagNoKrlAnalysis = 8192
+} 	EKCopyFlag;
 
 
 typedef struct tagTKMessage

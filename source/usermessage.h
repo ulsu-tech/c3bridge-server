@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -31,62 +31,18 @@
  */
 
 
-#ifndef BUFFERSTREAM_H
-#define BUFFERSTREAM_H
+#ifndef USERMESSAGE_H_INCLUDED
+#define USERMESSAGE_H_INCLUDED
 
 
-class BString;
-
-
-class BufferStream
+class UserMessage
 {
 public:
-    enum ByteOrder
-    {
-        BigEndian,
-        LittleEndian
-    };
-
-    BufferStream(std::vector<char>& buffer, ByteOrder order);
-
-    void reset();
-
-    char* data();
-
-    size_t size() const;
-    size_t skip(size_t size);
-
-    void append(unsigned char value);
-    void append(unsigned short value);
-    void append(unsigned int value);
-    void append(bool value);
-    void append(int value);
-    void append(long value);
-    void append(const std::string& value);
-    void append(const std::wstring& value);
-    void append(const BString& value);
-
-    void set(size_t position, unsigned short value);
+    static UINT reserve();
 
 private:
-    std::vector<char>& _buffer;
-
-    size_t _offset;
-
-    ByteOrder _currentOrder;
-    ByteOrder _systemOrder;
+    static UINT _reserved;
 };
 
 
-inline char* BufferStream::data()
-{
-    return &_buffer[0];
-}
-
-inline size_t BufferStream::size() const
-{
-    return _offset;
-}
-
-
-#endif // BUFFERSTREAM_H
+#endif // USERMESSAGE_H_INCLUDED

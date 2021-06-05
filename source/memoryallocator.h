@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -31,52 +31,57 @@
  */
 
 
-#ifndef RINGBUFFER_H
-#define RINGBUFFER_H
+#ifndef MEMORYALLOCATOR_H_INCLUDED
+#define MEMORYALLOCATOR_H_INCLUDED
 
 
-class RingBuffer
+class MemoryAllocator
 {
 public:
-    explicit RingBuffer(size_t size);
+    static MemoryAllocator* instance();
 
-    void clear();
-
-    size_t bytesUsed() const;
-    size_t bytesFree() const;
-
-    bool isEmpty() const;
-    bool isFull() const;
-
-    bool put(const void* data, size_t size);
-    size_t get(void* data, size_t size);
-    size_t getInSitu(void* data, size_t size, size_t offset) const;
-
-    void skip(size_t count);
-
+    static void* allocate(size_t size);
+    static void  reallocate(void** memory, size_t size);
+    static void  deallocate(void** memory);
 
 private:
-    std::vector<char> _buffer;
+    enum
+    {
+        DefaultShrinkPoint = 264000,
+        DefaultShrinkCount = 4
+    };
 
-    size_t _input;
-    size_t _output;
+    struct Buffer
+    {
+        void*  memory;
+        size_t size;
+        bool   used;
+    };
+
+    friend class MemoryAllocatorDestroyer;
+
+private:
+    MemoryAllocator();
+    ~MemoryAllocator();
+    MemoryAllocator(const MemoryAllocator&);
+    MemoryAllocator& operator=(const MemoryAllocator&);
+
+    void collect();
+
+    void* internalAllocate(size_t size);
+    void  internalReallocate(void** memory, size_t size);
+    void  internalDeallocate(void** memory);
+
+private:
+    static MemoryAllocator* _instance;
+
+    std::list<Buffer> _list;
+
+    size_t _sizeAllocated;
+    size_t _sizeHighPoint;
+    size_t _shrinkPoint;
+    size_t _shrinkCount;
 };
 
 
-inline void RingBuffer::clear()
-{
-    _output = _input;
-}
-
-inline bool RingBuffer::isEmpty() const
-{
-    return (_output == _input);
-}
-
-inline bool RingBuffer::isFull() const
-{
-    return (bytesFree() == 0);
-}
-
-
-#endif // RINGBUFFER_H
+#endif // MEMORYALLOCATOR_H_INCLUDED

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -35,42 +35,17 @@
 
 #include <c3bi.h>
 
-#include "client.h"
-#include "ringstream.h"
-#include "bufferstream.h"
 #include "cross3.h"
 #include "bstring.h"
+#include "client.h"
+#include "messagebuilder.h"
 
 
-void Client::handleCrossConfirmAll(WORD id, RingStream& stream)
+void Client::handleCrossConfirmAll(MessageReader& stream, MessageBuilder& output)
 {
-    bool ok = true;
-    WORD code = Cross3::instance()->crossConfirmAll();
+    uint16_t code = Cross3::instance()->crossConfirmAll();
 
-    //
     // ANSWER
-    //
-    BufferStream output(_outputBuffer, BufferStream::BigEndian);
-
-    // Empty header
-    output.skip(2 * sizeof(WORD));
-    size_t payloadSize = output.size();
-
-    // Payload type
-    output.append(static_cast<BYTE>(C3BI::CommandCrossConfirmAll));
-
-    // Error code
-    output.append(code);
-    output.append(ok);
-
-    payloadSize = output.size() - payloadSize;
-
-    if (payloadSize <= 0xFFFF)
-    {
-        // Fill header
-        output.set(0, id);
-        output.set(sizeof(WORD), static_cast<WORD>(payloadSize));
-
-        Send(output.data(), static_cast<int>(output.size()), 0);
-    }
+    output.setResponseCode(code, code == C3BI::ErrorSuccess);
+    reply(output);
 }

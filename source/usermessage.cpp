@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -31,54 +31,17 @@
  */
 
 
-#ifndef RINGSTREAM_H
-#define RINGSTREAM_H
+#include "stdafx.h"
+
+#include "usermessage.h"
 
 
-class RingBuffer;
-class BString;
+UINT UserMessage::_reserved = WM_USER;
 
 
-class RingStream
+UINT UserMessage::reserve()
 {
-public:
-    enum ByteOrder
-    {
-        BigEndian,
-        LittleEndian
-    };
+    _reserved++;
 
-    RingStream(RingBuffer& buffer, ByteOrder order);
-
-    void reset();
-
-    bool available(size_t length) const;
-
-    bool get(unsigned char& value);
-    bool get(unsigned short& value);
-    bool get(unsigned int& value);
-    bool get(short& value);
-    bool get(signed int& value);
-    bool get(bool& value);
-    bool get(std::string& value, size_t size);
-    bool get(std::wstring& value, size_t size);
-    bool get(BString& value, size_t size);
-
-private:
-    RingBuffer& _buffer;
-
-    size_t _offset;
-    size_t _length;
-
-    ByteOrder _currentOrder;
-    ByteOrder _systemOrder;
-};
-
-
-inline bool RingStream::available(size_t length) const
-{
-    return (_offset + length <= _length);
+    return _reserved;
 }
-
-
-#endif // RINGSTREAM_H

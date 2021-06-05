@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -96,6 +96,135 @@ unsigned short Cross3::getErrorCode(HRESULT result)
     }
 }
 
+bool Cross3::variantToStringList(VARIANT* variant,
+    std::vector<BString>& output, size_t& total)
+{
+    output.clear();
+    total = 0;
+
+    if (!V_ISARRAY(variant))
+        return false;
+
+    SAFEARRAY* safeArray = V_ARRAY(variant);
+
+    VARTYPE itemType = VT_NULL;
+    SafeArrayGetVartype(safeArray, &itemType);
+
+    if (itemType != VT_BSTR)
+        return false;
+
+    if (SafeArrayGetDim(safeArray) != 1)
+        return false;
+
+    LONG lBound = 0;
+    LONG uBound = 0;
+
+    if (FAILED(SafeArrayGetLBound(safeArray, 1, &lBound)) ||
+        FAILED(SafeArrayGetUBound(safeArray, 1, &uBound)))
+    {
+        return false;
+    }
+
+    LONG count = uBound - lBound + 1;
+
+    if (count < 0)
+        return false;
+    if (count == 0)
+        return true;
+
+    BSTR* raw = NULL;
+
+    if (FAILED(SafeArrayAccessData(safeArray,
+		reinterpret_cast<void**>(&raw))))
+	{
+        return false;
+	}
+
+    output.resize(static_cast<size_t>(count));
+
+    for (size_t i = 0; i < output.size(); ++i)
+    {
+        output[i] = BString(raw[i], true);
+        total += SysStringByteLen(raw[i]);
+    }
+
+    SafeArrayUnaccessData(safeArray);
+
+	return true;
+}
+
+bool Cross3::variantToVector(VARIANT* variant,
+    std::vector<uint8_t>& output)
+{
+    output.clear();
+
+    if (!V_ISARRAY(variant))
+        return false;
+
+    SAFEARRAY* safeArray = V_ARRAY(variant);
+
+    VARTYPE itemType = VT_NULL;
+    SafeArrayGetVartype(safeArray, &itemType);
+
+    if (itemType != VT_I1 && itemType != VT_UI1)
+        return false;
+
+    if (SafeArrayGetDim(safeArray) != 1)
+        return false;
+
+    LONG lBound = 0;
+    LONG uBound = 0;
+
+    if (FAILED(SafeArrayGetLBound(safeArray, 1, &lBound)) ||
+        FAILED(SafeArrayGetUBound(safeArray, 1, &uBound)))
+    {
+        return false;
+    }
+
+    LONG count = uBound - lBound + 1;
+
+    if (count < 0)
+        return false;
+    if (count == 0)
+        return true;
+
+    void* raw = NULL;
+
+    if (FAILED(SafeArrayAccessData(safeArray, &raw)))
+        return false;
+
+    output.resize(static_cast<size_t>(count));
+
+    memcpy(&output[0], raw, output.size());
+
+    SafeArrayUnaccessData(safeArray);
+
+    return true;
+}
+
+bool Cross3::vectorToVariant(const std::vector<uint8_t>& input,
+    VARIANT* variant)
+{
+    if (!variant)
+        return false;
+
+    variant->vt = VT_ARRAY | VT_UI1;
+    variant->parray = SafeArrayCreateVector(VT_UI1, 0,
+        static_cast<UINT>(input.size()));
+
+    void* raw = NULL;
+
+    if (FAILED(SafeArrayAccessData(variant->parray, &raw)))
+        return false;
+
+    if (raw && input.size() > 0)
+        memcpy(raw, &input[0], input.size());
+
+    SafeArrayUnaccessData(variant->parray);
+
+    return true;
+}
+
 unsigned short Cross3::getVariable(const std::string& name, std::string& value)
 {
     if (!_syncVar)
@@ -161,7 +290,7 @@ unsigned short Cross3::programReset(short interpreter)
     if (!_syncSelect)
         return C3BI::ErrorNoInterface;
 
-    return getErrorCode(_syncSelect->Reset(interpreter == 0 ? eInterpreterSubmit : eInterpreterRobot));
+    return getErrorCode(_syncSelect->Reset(static_cast<EKInterpreter>(interpreter)));
 }
 
 unsigned short Cross3::programStart(short interpreter)
@@ -169,7 +298,7 @@ unsigned short Cross3::programStart(short interpreter)
     if (!_syncSelect)
         return C3BI::ErrorNoInterface;
 
-    return getErrorCode(_syncSelect->Start(interpreter == 0 ? eInterpreterSubmit : eInterpreterRobot));
+    return getErrorCode(_syncSelect->Start(static_cast<EKInterpreter>(interpreter)));
 }
 
 unsigned short Cross3::programStop(short interpreter)
@@ -177,7 +306,7 @@ unsigned short Cross3::programStop(short interpreter)
     if (!_syncSelect)
         return C3BI::ErrorNoInterface;
 
-    return getErrorCode(_syncSelect->Stop(interpreter == 0 ? eInterpreterSubmit : eInterpreterRobot));
+    return getErrorCode(_syncSelect->Stop(static_cast<EKInterpreter>(interpreter)));
 }
 
 unsigned short Cross3::programCancel(short interpreter)
@@ -185,7 +314,7 @@ unsigned short Cross3::programCancel(short interpreter)
     if (!_syncSelect)
         return C3BI::ErrorNoInterface;
 
-    return getErrorCode(_syncSelect->Cancel(interpreter == 0 ? eInterpreterSubmit : eInterpreterRobot));
+    return getErrorCode(_syncSelect->Cancel(static_cast<EKInterpreter>(interpreter)));
 }
 
 unsigned short Cross3::programSelect(const BString& name, const BString& parameters, bool force)
@@ -235,12 +364,10 @@ unsigned short Cross3::kcpKeyStart(long interpreter, bool backward, bool off)
     if (!_syncKcpKey)
         return C3BI::ErrorNoInterface;
 
-    EKInterpreter eInterpreter = interpreter ? eInterpreterRobot : eInterpreterSubmit;
-
     VARIANT_BOOL bBackward = backward ? TRUE : FALSE;
     VARIANT_BOOL bOff = off ? TRUE : FALSE;
 
-    return getErrorCode(_syncKcpKey->Start(eInterpreter, bBackward, bOff));
+    return getErrorCode(_syncKcpKey->Start(static_cast<EKInterpreter>(interpreter), bBackward, bOff));
 }
 
 unsigned short Cross3::kcpKeyStop(long interpreter, bool off)
@@ -248,11 +375,9 @@ unsigned short Cross3::kcpKeyStop(long interpreter, bool off)
     if (!_syncKcpKey)
         return C3BI::ErrorNoInterface;
 
-    EKInterpreter eInterpreter = interpreter ? eInterpreterRobot : eInterpreterSubmit;
-
     VARIANT_BOOL bOff = off ? TRUE : FALSE;
 
-    return getErrorCode(_syncKcpKey->Stop(eInterpreter, bOff));
+    return getErrorCode(_syncKcpKey->Stop(static_cast<EKInterpreter>(interpreter), bOff));
 }
 
 unsigned short Cross3::kcpKeyMove(long axis, long key, bool direction, bool off)
@@ -284,7 +409,8 @@ unsigned short Cross3::fileSetAttribute(const BString& name, long attribute, lon
     return getErrorCode(_syncFile->SetAttribute(name.bstr(), attribute, mask));
 }
 
-unsigned short Cross3::fileNameList(const BString& path, long type, long flags)
+unsigned short Cross3::fileNameList(const BString& path, long type, long flags,
+    FileNameList& list)
 {
     if (!_syncFile)
         return C3BI::ErrorNoInterface;
@@ -292,7 +418,21 @@ unsigned short Cross3::fileNameList(const BString& path, long type, long flags)
     VARIANT names;
     VARIANT info;
 
-    return getErrorCode(_syncFile->NameList(path.bstr(), type, flags, &names, &info));
+    VariantInit(&names);
+    VariantInit(&info);
+
+    HRESULT result = _syncFile->NameList(path.bstr(), type, flags, &names, &info);
+
+    if (SUCCEEDED(result))
+    {
+        variantToStringList(&names, list.names, list.sizeOfNames);
+        variantToStringList(&info, list.info, list.sizeOfInfo);
+    }
+
+    VariantClear(&info);
+    VariantClear(&names);
+
+    return getErrorCode(result);
 }
 
 unsigned short Cross3::fileCreate(const BString& name, unsigned short itemType, unsigned char modulePart,
@@ -383,7 +523,8 @@ unsigned short Cross3::fileGetKrcName(const BString& name, BString& krcName)
     return getErrorCode(_syncFile->GetKrcName(name.bstr(), krcName.address()));
 }
 
-unsigned short Cross3::fileReadContent(const BString& name, long flags, std::vector<char>& content)
+unsigned short Cross3::fileReadContent(const BString& name, long flags,
+    std::vector<uint8_t>& content)
 {
     content.clear();
 
@@ -392,11 +533,39 @@ unsigned short Cross3::fileReadContent(const BString& name, long flags, std::vec
 
     VARIANT vContent;
 
-    unsigned short result = getErrorCode(_syncFile->CopyFile2Mem(name.bstr(), flags, &vContent));
+    VariantInit(&vContent);
+
+    HRESULT result = _syncFile->CopyFile2Mem(name.bstr(), flags, &vContent);
+
+    if (SUCCEEDED(result))
+    {
+        if (!variantToVector(&vContent, content))
+            result = E_FAIL;
+    }
 
     VariantClear(&vContent);
 
-    return result;
+    return getErrorCode(result);
+}
+
+unsigned short Cross3::fileWriteContent(const BString& name, long flags,
+    const std::vector<uint8_t>& content)
+{
+    if (!_syncFile)
+        return C3BI::ErrorNoInterface;
+
+    VARIANT vContent;
+
+    VariantInit(&vContent);
+
+    HRESULT result = E_FAIL;
+
+    if (vectorToVariant(content, &vContent))
+        result = _syncFile->CopyMem2File(vContent, name.bstr(), flags);
+
+    VariantClear(&vContent);
+
+    return getErrorCode(result);
 }
 
 unsigned short Cross3::crossConfirmAll()

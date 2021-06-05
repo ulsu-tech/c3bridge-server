@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -464,7 +464,14 @@ void BString::Data::toString(std::string& string)
 
 void BString::Data::toWideString(std::wstring& string)
 {
-    string = _string;
+    if (!_string)
+    {
+        string = L"";
+    }
+    else
+    {
+        string = _string;
+    }
 }
 
 LONG BString::Data::addReference()

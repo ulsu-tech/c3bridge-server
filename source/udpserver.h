@@ -31,27 +31,47 @@
  */
 
 
-#ifndef CALLBACKERRORIMPLEMENTATION_H
-#define CALLBACKERRORIMPLEMENTATION_H
+#ifndef UDPSERVER_H_INCLUDED
+#define UDPSERVER_H_INCLUDED
 
 
-#include "cross3krc.h"
-
-
-class CallbackErrorImplementation : public IKCallbackError
+class UdpServer : public Win32xx::CSocket
 {
 public:
-    CallbackErrorImplementation();
+    UdpServer();
 
-    virtual HRESULT __stdcall QueryInterface(REFIID riid, void** ppvObject);
-    virtual ULONG __stdcall AddRef(void);
-    virtual ULONG __stdcall Release(void);
-    virtual HRESULT __stdcall OnError(long nID, TKMessage* pErrorData);
-    virtual HRESULT __stdcall OnDialog(long nID, TKDialog* pDialogData);
+    bool start(LPCTSTR address, UINT port);
+    void stop();
+
+    bool windowProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+    void setWindow(HWND window);
+    void setLegacy(bool legacy, uint16_t peer);
 
 private:
-    ULONG _counter;
+    static LPCSTR _discoveryWord;
+
+    std::string _robotModelName;
+    std::string _robotSerialNo;
+
+    UINT _messageId;
+    HWND _window;
+
+    bool _legacy;
+    uint16_t _legacyPeer;
 };
 
 
-#endif // CALLBACKERRORIMPLEMENTATION_H
+inline void UdpServer::setWindow(HWND window)
+{
+    _window = window;
+}
+
+inline void UdpServer::setLegacy(bool legacy, uint16_t peer)
+{
+    _legacy = legacy;
+    _legacyPeer = peer;
+}
+
+
+#endif // UDPSERVER_H_INCLUDED

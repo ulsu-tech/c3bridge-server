@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -55,13 +55,18 @@ public:
 
     Win32xx::CString         networkTcpAddress;
     Win32xx::CString         networkUdpAddress;
-    unsigned int             networkTcpPort;
-    unsigned int             networkUdpPort;
-    unsigned int             networkUdpLegacyPort;
-    unsigned int             networkUdpLegacyPeer;
+    uint32_t                 networkTcpPort;
+    uint32_t                 networkUdpPort;
+    uint32_t                 networkUdpLegacyPort;
+    uint32_t                 networkUdpLegacyPeer;
+    uint32_t                 networkMessageTimeout;
+    uint32_t                 networkIdleTimeout;
     bool                     networkTcpEnabled;
     bool                     networkUdpEnabled;
     bool                     networkUdpLegacyEnabled;
+
+    uint32_t                 logLimit;
+    uint32_t                 logSeverity;
 
 private:
     static bool checkAddress(const Win32xx::CString& address);
@@ -81,14 +86,16 @@ private:
         }
     }
 
-    static bool keyReadBool(Win32xx::CRegKey& key, LPCTSTR name, bool defaultValue);
+    static bool keyReadBool(Win32xx::CRegKey& key, LPCTSTR name,
+        bool defaultValue);
     static Win32xx::CString keyReadString(Win32xx::CRegKey& key, LPCTSTR name,
         const Win32xx::CString& defaultValue);
 
     template <typename T>
     static bool keyWrite(Win32xx::CRegKey& key, LPCTSTR name, T value)
     {
-        return key.SetDWORDValue(name, static_cast<DWORD>(value)) == ERROR_SUCCESS;
+        return key.SetDWORDValue(name, static_cast<DWORD>(value)) ==
+            ERROR_SUCCESS;
     }
 
     static bool keyWriteBool(Win32xx::CRegKey& key, LPCTSTR name, bool value);
@@ -105,13 +112,17 @@ private:
         DefaultTcpPort       = 7000,
         DefaultUdpPort       = 7000,
         DefaultUdpLegacyPort = 6999,
-        DefaultUdpLegacyPeer = 7000
+        DefaultUdpLegacyPeer = 7000,
+        DefaultTimeout       = 0,
+        DefaultLogLimit      = 4000,
+        DefaultLogSeverity   = 4
     };
 
     enum Limits
     {
         LimitMinimumPort     = 1,
-        LimitMaximumPort     = 65534
+        LimitMaximumPort     = 65534,
+        LimitMaximumSeverity = 6
     };
 
     static LPCTSTR DefaultTcpAddress;

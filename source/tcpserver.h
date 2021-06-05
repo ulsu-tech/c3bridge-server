@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -31,16 +31,67 @@
  */
 
 
-#ifndef UTILITIES_H
-#define UTILITIES_H
+#ifndef TCPSERVER_H_INCLUDED
+#define TCPSERVER_H_INCLUDED
 
 
-class Utilities
+#include "client.h"
+
+
+class TcpServer : public Win32xx::CSocket
 {
 public:
-    static Win32xx::CString getComputerName();
-    static Win32xx::CString getIsoDateTime();
+    TcpServer();
+
+    bool start(LPCTSTR address, UINT port);
+    void stop();
+
+    bool windowProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+    void setWindow(HWND window);
+    void setIdleTimeout(uint32_t value);
+    void setMessageTimeout(uint32_t value);
+
+private:
+    enum
+    {
+        TimerInterval = 1000
+    };
+
+private:
+    static void CALLBACK staticTimerCallback(HWND window, UINT message,
+        UINT_PTR pointer, DWORD elapsed);
+    bool sessionProc(WPARAM wParam, LPARAM lParam);
+
+    void onTimer(uint32_t elapsed);
+
+private:
+    std::list<PClient> _clients;
+
+    UINT _messageServer;
+    UINT _messageSession;
+    HWND _window;
+
+    uint32_t _lastId;
+    uint32_t _timeoutIdle;
+    uint32_t _timeoutMessage;
 };
 
 
-#endif // UTILITIES_H
+inline void TcpServer::setWindow(HWND window)
+{
+    _window = window;
+}
+
+inline void TcpServer::setIdleTimeout(uint32_t value)
+{
+    _timeoutIdle = value;
+}
+
+inline void TcpServer::setMessageTimeout(uint32_t value)
+{
+    _timeoutMessage = value;
+}
+
+
+#endif // TCPSERVER_H_INCLUDED

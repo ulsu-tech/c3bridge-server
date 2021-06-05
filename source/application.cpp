@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -36,8 +36,8 @@
 #include <c3bi.h>
 
 #include "application.h"
-#include "proxy.h"
 #include "cross3.h"
+#include "client.h"
 
 
 Application::Application()
@@ -51,39 +51,7 @@ Application::~Application()
 BOOL Application::InitInstance()
 {
     Cross3::instance();
-
-    Proxy::registerFeature(C3BI::CommandReadVariableAscii);
-    Proxy::registerFeature(C3BI::CommandWriteVariableAscii);
-    //Proxy::registerFeature(C3BI::CommandReadArrayAscii);
-    //Proxy::registerFeature(C3BI::CommandWriteArrayAscii);
-    Proxy::registerFeature(C3BI::CommandReadVariable);
-    Proxy::registerFeature(C3BI::CommandWriteVariable);
-    Proxy::registerFeature(C3BI::CommandReadMultiple);
-    Proxy::registerFeature(C3BI::CommandWriteMultiple);
-
-    Proxy::registerFeature(C3BI::CommandProgramControl);
-    Proxy::registerFeature(C3BI::CommandMotion);
-    Proxy::registerFeature(C3BI::CommandKcpAction);
-
-    Proxy::registerFeature(C3BI::CommandProxyInfo);
-    Proxy::registerFeature(C3BI::CommandProxyFeatures);
-
-    /*
-     * These capabilities have not been tested and can be dangerous.
-    Proxy::registerFeature(C3BI::CommandFileSetAttribute);
-    Proxy::registerFeature(C3BI::CommandFileNameList);
-    Proxy::registerFeature(C3BI::CommandFileCreate);
-    Proxy::registerFeature(C3BI::CommandFileDelete);
-    Proxy::registerFeature(C3BI::CommandFileCopy);
-    Proxy::registerFeature(C3BI::CommandFileMove);
-    Proxy::registerFeature(C3BI::CommandFileGetProperties);
-    Proxy::registerFeature(C3BI::CommandFileGetFullName);
-    Proxy::registerFeature(C3BI::CommandFileGetKrcName);
-    Proxy::registerFeature(C3BI::CommandFileWriteContent);
-    Proxy::registerFeature(C3BI::CommandFileReadContent);
-     */
-
-    Proxy::registerFeature(C3BI::CommandCrossConfirmAll);
+    Client::registerHandlers();
 
     _mainWindow.Create();
 

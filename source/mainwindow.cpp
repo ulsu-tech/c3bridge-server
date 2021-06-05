@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -37,51 +37,45 @@
 #include "resource.h"
 #include "cross3.h"
 #include "proxy.h"
-#include "utilities.h"
+#include "log.h"
+#include "usermessage.h"
 
 
-#define WM_TRAY_ICON   (WM_USER + 1)
-#define WM_TCP_SERVER  (WM_USER + 2)
-#define WM_TCP_SESSION (WM_USER + 3)
-#define WM_UDP_SERVER  (WM_USER + 4)
+MainWindow* MainWindow::_globalPointer = NULL;
 
 
-LPCSTR MainWindow::_discoveryWord = "WHEREAREYOU?";
+void MainWindow::addLogLine(LPCTSTR text)
+{
+    if (_globalPointer)
+        _globalPointer->_view.AddString(text);
+}
 
+Settings* MainWindow::settings()
+{
+    if (_globalPointer)
+        return &_globalPointer->_settings;
+
+    return NULL;
+}
 
 MainWindow::MainWindow()
 {
+    _globalPointer = this;
+
     memset(&_trayIcon, 0, sizeof(_trayIcon));
 
     _trayIcon.cbSize = sizeof(_trayIcon);
     _trayIcon.uID = IDW_MAIN;
     _trayIcon.uFlags = NIF_ICON | NIF_MESSAGE;
-    _trayIcon.uCallbackMessage = WM_TRAY_ICON;
+    _trayIcon.uCallbackMessage = UserMessage::reserve();
 
     SetView(_view);
 }
 
 MainWindow::~MainWindow()
 {
-}
-
-void MainWindow::log(LPCTSTR message)
-{
-    Win32xx::CTime time = Win32xx::CTime::GetCurrentTime();
-    _view.AddString(time.Format(IDS_FORMAT_DATETIME) + message);
-}
-
-void MainWindow::log(UINT messageId)
-{
-    Win32xx::CTime time = Win32xx::CTime::GetCurrentTime();
-    _view.AddString(time.Format(IDS_FORMAT_DATETIME) + 
-        Win32xx::LoadString(messageId));
-}
-
-void MainWindow::log(const Win32xx::CString& message)
-{
-    Win32xx::CTime time = Win32xx::CTime::GetCurrentTime();
-    _view.AddString(time.Format(IDS_FORMAT_DATETIME) + message);
+    if (_globalPointer == this)
+        _globalPointer = NULL;
 }
 
 BOOL MainWindow::OnCommand(WPARAM wParam, LPARAM lParam)
@@ -105,6 +99,7 @@ BOOL MainWindow::OnCommand(WPARAM wParam, LPARAM lParam)
         return FALSE;
     }
 
+    Log::Severity severity = Log::severity();
 
     switch (LOWORD(wParam))
     {
@@ -127,8 +122,39 @@ BOOL MainWindow::OnCommand(WPARAM wParam, LPARAM lParam)
         OnHelp();
         return TRUE;
 
+    case IDS_LOG_SEVERITY_FATAL:
+        severity = Log::Fatal;
+        break;
+
+    case IDS_LOG_SEVERITY_ERROR:
+        severity = Log::Error;
+        break;
+
+    case IDS_LOG_SEVERITY_WARNING:
+        severity = Log::Warning;
+        break;
+
+    case IDS_LOG_SEVERITY_INFO:
+        severity = Log::Info;
+        break;
+
+    case IDS_LOG_SEVERITY_DEBUG:
+        severity = Log::Debug;
+        break;
+
+    case IDS_LOG_SEVERITY_VERBOSE:
+        severity = Log::Verbose;
+        break;
+
     default:
         break;
+    }
+
+    if (severity != Log::severity())
+    {
+        Log::setSeverity(severity);
+        updateLogLevelMenu();
+        return TRUE;
     }
 
     return FALSE;
@@ -182,15 +208,51 @@ void MainWindow::OnInitialUpdate()
 
     Shell_NotifyIcon(NIM_ADD, &_trayIcon);
 
+    Log::Severity severity = static_cast<Log::Severity>(_settings.logSeverity);
+
+    std::vector<Win32xx::CString> arguments = Win32xx::GetCommandLineArgs();
+
+    for (size_t i = 0; i < arguments.size(); ++i)
+    {
+        if (arguments[i] == _T("-debug"))
+        {
+            ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW);
+
+            if (severity != Log::None && severity < Log::Debug)
+                severity = Log::Debug;
+        }
+        else if (arguments[i] == _T("-verbose"))
+        {
+            if (severity != Log::None && severity < Log::Verbose)
+                severity = Log::Verbose;
+        }
+    }
+
+    // Log Settings
+    Log::setSeverity(severity);
+    updateLogLevelMenu();
+    _view.setLineLimit(_settings.logLimit);
+
+    _server.setWindow(GetHwnd());
+    _server.setIdleTimeout(_settings.networkIdleTimeout);
+    _server.setMessageTimeout(_settings.networkMessageTimeout);
+
+    _serverUdp.setWindow(GetHwnd());
+    _serverUdpLegacy.setWindow(GetHwnd());
+
     if (_settings.networkTcpEnabled)
-        startTcpServer(_settings.networkTcpAddress, _settings.networkTcpPort);
+        _server.start(_settings.networkTcpAddress, _settings.networkTcpPort);
 
     if (_settings.networkUdpEnabled)
-        startUdpServer(_settings.networkUdpAddress, _settings.networkUdpPort);
+    {
+        _serverUdp.start(_settings.networkUdpAddress,
+            _settings.networkUdpPort);
+    }
 
     if (_settings.networkUdpLegacyEnabled)
     {
-        startUdpLegacyServer(_settings.networkUdpAddress,
+        _serverUdpLegacy.setLegacy(true, _settings.networkUdpLegacyPeer);
+        _serverUdpLegacy.start(_settings.networkUdpAddress,
             _settings.networkUdpLegacyPort);
     }
 }
@@ -242,27 +304,22 @@ LRESULT MainWindow::WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
         info->ptMinTrackSize.y = _settings.windowMinimumHeight;
         return 0;
     }
-
-    switch (uMsg)
+    else if (uMsg == _trayIcon.uCallbackMessage)
     {
-    case WM_TRAY_ICON:
         onTrayIcon(wParam, lParam);
         return 0;
-
-    case WM_TCP_SERVER:
-        onTcpServerEvent(wParam, lParam);
+    }
+    else if (_server.windowProc(uMsg, wParam, lParam))
+    {
         return 0;
-
-    case WM_TCP_SESSION:
-        onTcpSessionEvent(wParam, lParam);
+    }
+    else if (_serverUdp.windowProc(uMsg, wParam, lParam))
+    {
         return 0;
-
-    case WM_UDP_SERVER:
-        onUdpServerEvent(wParam, lParam);
+    }
+    else if (_serverUdpLegacy.windowProc(uMsg, wParam, lParam))
+    {
         return 0;
-
-    default:
-        break;
     }
 
     return WndProcDefault(uMsg, wParam, lParam);
@@ -307,248 +364,33 @@ void MainWindow::onTrayIcon(WPARAM wParam, LPARAM lParam)
     }
 }
 
-void MainWindow::onTcpServerEvent(WPARAM wParam, LPARAM lParam)
+void MainWindow::updateLogLevelMenu()
 {
-    if (WSAGETSELECTERROR(lParam) || WSAGETSELECTEVENT(lParam) == FD_CLOSE)
+    UINT item = IDS_LOG_SEVERITY_VERBOSE;
+
+    switch (Log::severity())
     {
-        stopTcpServer();
-    }
-    else if (WSAGETSELECTEVENT(lParam) == FD_ACCEPT)
-    {
-        PClient client = new Client();
-
-        _server.Accept(*client, NULL, NULL);
-
-        if (client->GetSocket() == INVALID_SOCKET)
-        {
-            using namespace Win32xx;
-
-            TRACE(_T("Invalid accept socket"));
-        }
-        else
-        {
-            _clients.push_back(client);
-
-            client->StartAsync(GetHwnd(), WM_TCP_SESSION, FD_READ | FD_WRITE | FD_CLOSE);
-        }
-    }
-}
-
-void MainWindow::onTcpSessionEvent(WPARAM wParam, LPARAM lParam)
-{
-    std::list<PClient>::iterator iterator;
-
-    for (iterator = _clients.begin(); iterator != _clients.end(); ++iterator)
-    {
-        if ((*iterator).get() && (*iterator)->GetSocket() == static_cast<SOCKET>(wParam))
-            break;
+    case Log::Fatal:
+        item = IDS_LOG_SEVERITY_FATAL;
+        break;
+    case Log::Error:
+        item = IDS_LOG_SEVERITY_ERROR;
+        break;
+    case Log::Warning:
+        item = IDS_LOG_SEVERITY_WARNING;
+        break;
+    case Log::Info:
+        item = IDS_LOG_SEVERITY_INFO;
+        break;
+    case Log::Debug:
+        item = IDS_LOG_SEVERITY_DEBUG;
+        break;
+    case Log::Verbose:
+    default:
+        item = IDS_LOG_SEVERITY_VERBOSE;
+        break;
     }
 
-    if (iterator == _clients.end())
-    {
-        ::closesocket(static_cast<SOCKET>(wParam));
-    }
-    else if (WSAGETSELECTERROR(lParam) || WSAGETSELECTEVENT(lParam) == FD_CLOSE)
-    {
-        (*iterator)->OnDisconnect();
-        (*iterator)->Disconnect();
-
-        _clients.erase(iterator);
-
-        log(_T("Client session error or FD_CLOSE, TODO: closeSession()"));
-    }
-    else if (WSAGETSELECTEVENT(lParam) == FD_READ)
-    {
-        (*iterator)->OnReceive();
-    }
-    else if (WSAGETSELECTEVENT(lParam) == FD_WRITE)
-    {
-        (*iterator)->OnSend();
-    }
-}
-
-void MainWindow::onUdpServerEvent(WPARAM wParam, LPARAM lParam)
-{
-    Win32xx::CSocket* server = NULL;
-
-    if (_serverUdp.GetSocket() == static_cast<SOCKET>(wParam))
-    {
-        server = &_serverUdp;
-    }
-    else if (_serverUdpLegacy.GetSocket() == static_cast<SOCKET>(wParam))
-    {
-        server = &_serverUdpLegacy;
-    }
-
-    if (!server)
-        return;
-
-    if (WSAGETSELECTERROR(lParam) || WSAGETSELECTEVENT(lParam) == FD_CLOSE)
-    {
-        server->Disconnect();
-    }
-    else if (WSAGETSELECTEVENT(lParam) == FD_READ)
-    {
-        char buffer[33];
-        memset(buffer, 0, sizeof(buffer));
-
-        sockaddr_in client;
-        memset(&client, 0, sizeof(client));
-
-        int clientSize = static_cast<int>(sizeof(client));
-
-        server->ReceiveFrom(buffer, sizeof(buffer) - 1, 0, 
-            reinterpret_cast<sockaddr*>(&client), &clientSize);
-
-        std::string output;
-
-        if (strcmp(buffer, _discoveryWord) == 0)
-        {
-            if (_robotSerialNo.empty())
-            {
-                Cross3::instance()->getVariable("$KR_SERIALNO", _robotSerialNo);
-                Cross3::instance()->getVariable("$MODEL_NAME[]", _robotModelName);
-            }
-
-            output = "KUKA|" + _robotModelName + "|" + _robotSerialNo;
-        }
-        else if (buffer[0] == '@')
-        {
-            output = Win32xx::TtoA(Proxy::getVariable(buffer).c_str());
-        }
-
-        if (output.size() > 0)
-        {
-            if (server == &_serverUdpLegacy)
-                client.sin_port = htons(_settings.networkUdpLegacyPeer);
-
-            clientSize = static_cast<int>(sizeof(client));
-
-            server->SendTo(output.c_str(), static_cast<int>(output.size()), 0,
-                reinterpret_cast<const sockaddr*>(&client), clientSize);
-        }
-    }
-}
-
-bool MainWindow::startTcpServer(LPCTSTR address, UINT port)
-{
-    if (!_server.Create(PF_INET, SOCK_STREAM))
-    {
-        log(IDS_ERROR_TCP_SERVER_CREATE);
-        return false;
-    }
-
-    if (_server.Bind(address, port) != 0)
-    {
-        _server.Disconnect();
-
-        Win32xx::CString message;
-        message.Format(IDS_ERROR_TCP_SERVER_BIND, port);
-
-        log(message);
-        return false;
-    }
-
-    if (_server.Listen() != 0)
-    {
-        _server.Disconnect();
-        log(IDS_ERROR_TCP_SERVER_LISTEN);
-        return false;
-    }
-
-    if (_server.StartAsync(GetHwnd(), WM_TCP_SERVER, FD_ACCEPT | FD_CLOSE) != 0)
-    {
-        _server.Disconnect();
-        log(IDS_ERROR_TCP_SERVER_ASYNC);
-        return false;
-    }
-
-    Win32xx::CString message;
-    message.Format(IDS_NOTICE_TCP_SERVER_STARTED, Utilities::getComputerName().c_str(), port);
-
-    log(message);
-    return true;
-}
-
-void MainWindow::stopTcpServer()
-{
-    _clients.clear();
-    _server.Disconnect();
-}
-
-bool MainWindow::startUdpLegacyServer(LPCTSTR address, UINT port)
-{
-    if (!_serverUdpLegacy.Create(PF_INET, SOCK_DGRAM))
-    {
-        log(IDS_ERROR_UDP_LEGACY_SERVER_CREATE);
-        return false;
-    }
-
-    if (_serverUdpLegacy.Bind(address, port) != 0)
-    {
-        _serverUdpLegacy.Disconnect();
-
-        Win32xx::CString message;
-        message.Format(IDS_ERROR_UDP_LEGACY_SERVER_BIND, port);
-
-        log(message);
-        return false;
-    }
-
-    if (_serverUdpLegacy.StartAsync(GetHwnd(), WM_UDP_SERVER, FD_READ | FD_CLOSE) != 0)
-    {
-        _serverUdpLegacy.Disconnect();
-        log(IDS_ERROR_UDP_LEGACY_SERVER_ASYNC);
-        return false;
-    }
-
-    Win32xx::CString message;
-    message.Format(IDS_NOTICE_UDP_LEGACY_SERVER_STARTED, port);
-
-    log(message);
-    return true;
-}
-
-void MainWindow::stopUdpLegacyServer()
-{
-    _serverUdpLegacy.Disconnect();
-}
-
-bool MainWindow::startUdpServer(LPCTSTR address, UINT port)
-{
-    if (!_serverUdp.Create(PF_INET, SOCK_DGRAM))
-    {
-        log(IDS_ERROR_UDP_SERVER_CREATE);
-        return false;
-    }
-
-    if (_serverUdp.Bind(address, port) != 0)
-    {
-        _serverUdp.Disconnect();
-
-        Win32xx::CString message;
-        message.Format(IDS_ERROR_UDP_SERVER_BIND, port);
-
-        log(message);
-        return false;
-    }
-
-    if (_serverUdp.StartAsync(GetHwnd(), WM_UDP_SERVER, FD_READ | FD_CLOSE) != 0)
-    {
-        _serverUdp.Disconnect();
-        log(IDS_ERROR_UDP_SERVER_ASYNC);
-        return false;
-    }
-
-
-    Win32xx::CString message;
-    message.Format(IDS_NOTICE_UDP_SERVER_STARTED, port);
-
-    log(message);
-    return true;
-}
-
-void MainWindow::stopUdpServer()
-{
-    _serverUdp.Disconnect();
+    Win32xx::CMenu menu = GetMenu();
+    menu.CheckMenuRadioItem(IDS_LOG_SEVERITY_FATAL, IDS_LOG_SEVERITY_VERBOSE, item, MF_BYCOMMAND);
 }

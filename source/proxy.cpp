@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -34,12 +34,41 @@
 #include "stdafx.h"
 
 #include "proxy.h"
-#include "utilities.h"
+#include "client.h"
+#include "mainwindow.h"
 
 
-BYTE    Proxy::_features[32] = { 0 };
-LPCTSTR Proxy::_type         = _T("C3 BRIDGE INTERFACE");
+Win32xx::CString Proxy::getComputerName()
+{
+    DWORD size = 0;
 
+    GetComputerName(NULL, &size);
+
+    Win32xx::CString result;
+
+    GetComputerName(result.GetBuffer(size), &size);
+
+    result.ReleaseBuffer();
+
+    return result;
+}
+
+Win32xx::CString Proxy::getIsoDateTime()
+{
+    SYSTEMTIME time;
+    ::GetSystemTime(&time);
+
+    Win32xx::CString result;
+
+    // ISO 8601 extended format yyyy-MM-ddTHH:mm:ss
+    // with a time-zone suffix (Z for UTC)
+    // Example: 2020-06-25T12:14:00Z
+    result.Format(_T("%.4hu-%.2hu-%.2huT%.2hu:%.2hu:%.2huZ"),
+        time.wYear, time.wMonth, time.wDay,
+        time.wHour, time.wMinute, time.wSecond);
+
+    return result;
+}
 
 Win32xx::CString Proxy::getVariable(const Win32xx::CString& variable)
 {
@@ -47,46 +76,39 @@ Win32xx::CString Proxy::getVariable(const Win32xx::CString& variable)
 
     if (variable == _T("@PROXY_TYPE"))
     {
-        result = _type;
+        result = _T(PROXY_TYPE);
     }
     else if (variable == _T("@PROXY_VERSION"))
     {
-        result.Format(_T("%u.%u"), VersionMajor, VersionMinor);
+        result.Format(_T("%u.%u"), PROXY_VERSION_MAJOR, PROXY_VERSION_MINOR);
 
-        if (VersionType == VersionOpenSource)
-        {
-            result += _T(" (OPEN SOURCE)");
-        }
-        else if (VersionType == VersionProprietary)
-        {
-            result += _T(" (PROPRIETARY)");
-        }
+#if (PROXY_VERSION_TYPE == PROXY_VERSION_OPEN_SOURCE)
+        result += _T(" (OPEN SOURCE)");
+#elif (PROXY_VERSION_TYPE == PROXY_VERSION_PROPRIETARY)
+        result += _T(" (PROPRIETARY)");
+#elif (PROXY_VERSION_TYPE == PROXY_VERSION_FREEWARE)
+        result += _T(" (FREEWARE)");
+#elif (PROXY_VERSION_TYPE == PROXY_VERSION_INTERNAL)
+        result += _T(" (INTERNAL BUILD)");
+#endif
     }
     else if (variable == _T("@PROXY_FEATURES"))
     {
-        size_t highest = 0;
-		size_t octet = 0;
+        bool print = false;
 
-        for (octet = 31; octet > 0; --octet)
+        std::basic_string<TCHAR> value;
+        value.reserve(Client::TotalHandlers);
+
+        for (size_t index = Client::TotalHandlers; index > 0; --index)
         {
-            if (_features[octet] > 0)
+            if (Client::_handlers[index - 1])
             {
-                highest = octet;
-                break;
+                print = true;
+                value.push_back(_T('1'));
             }
-        }
-
-        std::basic_string<TCHAR> value((highest + 1) * 8, _T('0'));
-
-        for (octet = 0; octet < 32; ++octet)
-        {
-            if (octet > highest && octet != 0)
-                break;
-
-            for (size_t i = 0; i < 8; ++i)
+            else if (print || index <= 8)
             {
-                if (_features[octet] & (1 << i))
-                    value[value.size() - (octet * 8 + i) - 1] = _T('1');
+                value.push_back(_T('0'));
             }
         }
 
@@ -94,22 +116,30 @@ Win32xx::CString Proxy::getVariable(const Win32xx::CString& variable)
     }
     else if (variable == _T("@PROXY_HOSTNAME"))
     {
-        result = Utilities::getComputerName();
+        result = getComputerName();
     }
     else if (variable == _T("@PROXY_TIME"))
     {
-        result = Utilities::getIsoDateTime();
+        result = getIsoDateTime();
+    }
+    else if (variable == _T("@PROXY_ADDRESS"))
+    {
+        Settings* settings = MainWindow::settings();
+        if (settings)
+            result = settings->networkTcpAddress;
+    }
+    else if (variable == _T("@PROXY_PORT"))
+    {
+        Settings* settings = MainWindow::settings();
+        if (settings)
+            result.Format(_T("%u"), settings->networkTcpPort);
+    }
+    else if (variable == _T("@PROXY_ENABLED"))
+    {
+        Settings* settings = MainWindow::settings();
+        if (settings)
+            result = (settings->networkTcpEnabled ? _T("TRUE") : _T("FALSE"));
     }
 
     return result;
-}
-
-void Proxy::registerFeature(BYTE id)
-{
-    _features[id / 8] |= (1 << (id % 8));
-}
-
-BYTE Proxy::getFeatureOctet(BYTE id)
-{
-    return (id < 32) ? _features[id] : 0;
 }

@@ -63,7 +63,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)dependencies\win32xx</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)source;$(SolutionDir)include;$(SolutionDir)dependencies\win32xx</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -81,7 +82,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)dependencies\win32xx</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)source;$(SolutionDir)include;$(SolutionDir)dependencies\win32xx</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -92,52 +94,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\c3bi.h" />
-    <ClInclude Include="source\aboutdialog.h" />
-    <ClInclude Include="source\application.h" />
-    <ClInclude Include="source\bstring.h" />
-    <ClInclude Include="source\bufferstream.h" />
-    <ClInclude Include="source\callbackerrorimplementation.h" />
-    <ClInclude Include="source\client.h" />
-    <ClInclude Include="source\cross3.h" />
-    <ClInclude Include="source\cross3krc.h" />
-    <ClInclude Include="source\mainwindow.h" />
-    <ClInclude Include="source\proxy.h" />
-    <ClInclude Include="source\resource.h" />
-    <ClInclude Include="source\ringbuffer.h" />
-    <ClInclude Include="source\ringstream.h" />
-    <ClInclude Include="source\settings.h" />
-    <ClInclude Include="source\stdafx.h" />
-    <ClInclude Include="source\targetver.h" />
-    <ClInclude Include="source\utilities.h" />
-    <ClInclude Include="source\view.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="source\aboutdialog.cpp" />
-    <ClCompile Include="source\application.cpp" />
-    <ClCompile Include="source\bstring.cpp" />
-    <ClCompile Include="source\bufferstream.cpp" />
-    <ClCompile Include="source\callbackerrorimplementation.cpp" />
-    <ClCompile Include="source\client.cpp" />
-    <ClCompile Include="source\client_cross.cpp" />
-    <ClCompile Include="source\client_file.cpp" />
-    <ClCompile Include="source\client_variables.cpp" />
-    <ClCompile Include="source\cross3.cpp" />
-    <ClCompile Include="source\cross3krc.cpp" />
-    <ClCompile Include="source\main.cpp" />
-    <ClCompile Include="source\mainwindow.cpp" />
-    <ClCompile Include="source\proxy.cpp" />
-    <ClCompile Include="source\ringbuffer.cpp" />
-    <ClCompile Include="source\ringstream.cpp" />
-    <ClCompile Include="source\settings.cpp" />
-    <ClCompile Include="source\stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="source\utilities.cpp" />
-    <ClCompile Include="source\view.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="source\resources.rc" />
   </ItemGroup>
   <ItemGroup>
@@ -146,6 +102,59 @@
   <ItemGroup>
     <Image Include="resources\logo.bmp" />
     <Image Include="resources\main.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\aboutdialog.cpp" />
+    <ClCompile Include="source\application.cpp" />
+    <ClCompile Include="source\bstring.cpp" />
+    <ClCompile Include="source\callbackerrorimplementation.cpp" />
+    <ClCompile Include="source\client.cpp" />
+    <ClCompile Include="source\cross3.cpp" />
+    <ClCompile Include="source\cross3krc.cpp" />
+    <ClCompile Include="source\handlers\client_control.cpp" />
+    <ClCompile Include="source\handlers\client_cross.cpp" />
+    <ClCompile Include="source\handlers\client_file.cpp" />
+    <ClCompile Include="source\handlers\client_service.cpp" />
+    <ClCompile Include="source\handlers\client_variables.cpp" />
+    <ClCompile Include="source\log.cpp" />
+    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\mainwindow.cpp" />
+    <ClCompile Include="source\memoryallocator.cpp" />
+    <ClCompile Include="source\messagebuilder.cpp" />
+    <ClCompile Include="source\messagereader.cpp" />
+    <ClCompile Include="source\proxy.cpp" />
+    <ClCompile Include="source\settings.cpp" />
+    <ClCompile Include="source\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\tcpserver.cpp" />
+    <ClCompile Include="source\udpserver.cpp" />
+    <ClCompile Include="source\usermessage.cpp" />
+    <ClCompile Include="source\view.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\aboutdialog.h" />
+    <ClInclude Include="source\application.h" />
+    <ClInclude Include="source\bstring.h" />
+    <ClInclude Include="source\callbackerrorimplementation.h" />
+    <ClInclude Include="source\client.h" />
+    <ClInclude Include="source\cross3.h" />
+    <ClInclude Include="source\cross3krc.h" />
+    <ClInclude Include="source\log.h" />
+    <ClInclude Include="source\mainwindow.h" />
+    <ClInclude Include="source\memoryallocator.h" />
+    <ClInclude Include="source\messagebuilder.h" />
+    <ClInclude Include="source\messagereader.h" />
+    <ClInclude Include="source\proxy.h" />
+    <ClInclude Include="source\resource.h" />
+    <ClInclude Include="source\settings.h" />
+    <ClInclude Include="source\stdafx.h" />
+    <ClInclude Include="source\targetver.h" />
+    <ClInclude Include="source\tcpserver.h" />
+    <ClInclude Include="source\udpserver.h" />
+    <ClInclude Include="source\usermessage.h" />
+    <ClInclude Include="source\view.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

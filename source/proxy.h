@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -35,26 +35,38 @@
 #define PROXY_H
 
 
+#define PROXY_TYPE                "C3 BRIDGE INTERFACE"
+#define PROXY_NAME                "C3 Bridge Interface Server"
+#define PROXY_PRODUCT             "C3 Bridge Interface"
+#define PROXY_COMPANY             "S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University"
+#define PROXY_COPYRIGHT           "Copyright (C) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>"
+#define PROXY_INTERNALNAME        "C3BRIDGE"
+#define PROXY_FILENAME            "C3BRIDGE.EXE"
+#define PROXY_DOMAIN              "ulsu.tech"
+
+#define PROXY_VERSION_OPEN_SOURCE 0
+#define PROXY_VERSION_PROPRIETARY 1
+#define PROXY_VERSION_FREEWARE    2
+#define PROXY_VERSION_INTERNAL    3
+
+#define PROXY_VERSION_MAJOR       1
+#define PROXY_VERSION_MINOR       2
+#define PROXY_VERSION_TYPE        PROXY_VERSION_OPEN_SOURCE
+
+#define PROXY_STR_HELPER(x)       #x
+#define PROXY_STR(x)              PROXY_STR_HELPER(x)
+
+#define PROXY_VERSION_STRING      PROXY_STR(PROXY_VERSION_MAJOR) "." \
+                                  PROXY_STR(PROXY_VERSION_MINOR) "." \
+                                  PROXY_STR(PROXY_VERSION_TYPE) ".0"
+
+
 class Proxy
 {
 public:
+    static Win32xx::CString getComputerName();
+    static Win32xx::CString getIsoDateTime();
     static Win32xx::CString getVariable(const Win32xx::CString& variable);
-    static void registerFeature(BYTE id);
-    static BYTE getFeatureOctet(BYTE id);
-
-public:
-    enum Version
-    {
-        VersionMajor       = 1,
-        VersionMinor       = 0,
-        VersionOpenSource  = 0,
-        VersionProprietary = 1,
-        VersionType        = VersionOpenSource
-    };
-
-private:
-    static BYTE    _features[32];
-    static LPCTSTR _type;
 };
 
 

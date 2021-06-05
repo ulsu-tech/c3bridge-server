@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -48,17 +48,20 @@ BOOL AboutDialog::OnInitDialog()
 {
     Win32xx::CString type;
 
-    if (Proxy::VersionType == Proxy::VersionOpenSource)
-    {
-        type.LoadString(IDS_ABOUT_INFO_OPEN_SOURCE);
-    }
-    else if (Proxy::VersionType == Proxy::VersionProprietary)
-    {
-        type.LoadString(IDS_ABOUT_INFO_PROPRIETARY);
-    }
+#if (PROXY_VERSION_TYPE == PROXY_VERSION_OPEN_SOURCE)
+    type.LoadString(IDS_ABOUT_INFO_OPEN_SOURCE);
+#elif (PROXY_VERSION_TYPE == PROXY_VERSION_PROPRIETARY)
+    type.LoadString(IDS_ABOUT_INFO_PROPRIETARY);
+#elif (PROXY_VERSION_TYPE == PROXY_VERSION_FREEWARE)
+    type.LoadString(IDS_ABOUT_INFO_FREEWARE);
+#elif (PROXY_VERSION_TYPE == PROXY_VERSION_INTERNAL)
+    type.LoadString(IDS_ABOUT_INFO_INTERNAL);
+#endif
 
     Win32xx::CString text;
-    text.Format(IDS_ABOUT_INFO, Proxy::VersionMajor, Proxy::VersionMinor, type.c_str());
+    text.Format(IDS_ABOUT_INFO,
+        PROXY_VERSION_MAJOR, PROXY_VERSION_MINOR, PROXY_VERSION_TYPE,
+        type.c_str(), _T(PROXY_COPYRIGHT), _T(PROXY_COMPANY));
     SetDlgItemText(IDC_INFO, text.c_str());
 
     text.LoadString(IDW_MAIN);

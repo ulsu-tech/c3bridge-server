@@ -7,6 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
+#include "proxy.h"
 #ifndef APSTUDIO_INVOKED
 #include "targetver.h"
 #endif
@@ -36,8 +37,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,0
- PRODUCTVERSION 1,0,0,0
+ FILEVERSION PROXY_VERSION_MAJOR,PROXY_VERSION_MINOR,PROXY_VERSION_TYPE,0
+ PRODUCTVERSION PROXY_VERSION_MAJOR,PROXY_VERSION_MINOR,PROXY_VERSION_TYPE,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -52,14 +53,14 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University"
-            VALUE "FileDescription", "C3 Bridge Interface Server"
-            VALUE "FileVersion", "1.0.0.0"
-            VALUE "InternalName", "C3BRIDGE"
-            VALUE "LegalCopyright", "Copyright (C) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>"
-            VALUE "OriginalFilename", "C3BRIDGE.EXE"
-            VALUE "ProductName", "C3 Bridge Interface"
-            VALUE "ProductVersion", "1.0.0.0"
+            VALUE "CompanyName", PROXY_COMPANY
+            VALUE "FileDescription", PROXY_NAME
+            VALUE "FileVersion", PROXY_VERSION_STRING
+            VALUE "InternalName", PROXY_INTERNALNAME
+            VALUE "LegalCopyright", PROXY_COPYRIGHT
+            VALUE "OriginalFilename", PROXY_FILENAME
+            VALUE "ProductName", PROXY_PRODUCT
+            VALUE "ProductVersion", PROXY_VERSION_STRING
         END
     END
     BLOCK "VarFileInfo"
@@ -94,6 +95,15 @@ BEGIN
         MENUITEM "Copy\tCtrl+C",                IDM_EDIT_COPY, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "Clear Log",                   IDM_EDIT_CLEAR
+    END
+    POPUP "&Log Level"
+    BEGIN
+        MENUITEM "Fatal",                       IDS_LOG_SEVERITY_FATAL,
+        MENUITEM "Error",                       IDS_LOG_SEVERITY_ERROR,
+        MENUITEM "Warning",                     IDS_LOG_SEVERITY_WARNING,
+        MENUITEM "Info",                        IDS_LOG_SEVERITY_INFO,
+        MENUITEM "Debug",                       IDS_LOG_SEVERITY_DEBUG,
+        MENUITEM "Verbose",                     IDS_LOG_SEVERITY_VERBOSE
     END
     POPUP "&Help"
     BEGIN
@@ -178,6 +188,7 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
+    "#include ""proxy.h""\r\n"
     "#ifndef APSTUDIO_INVOKED\r\n"
     "#include ""targetver.h""\r\n"
     "#endif\r\n"
@@ -211,32 +222,97 @@ IDB_LOGO                BITMAP                  "../resources/logo.bmp"
 
 STRINGTABLE
 BEGIN
-    IDW_MAIN                "C3 Bridge Interface Server"
+    IDW_MAIN                 "C3 Bridge Interface Server"
 END
 
 STRINGTABLE
 BEGIN
-    IDS_FORMAT_DATETIME     "[%x %X] "
+    IDS_LOG_FORMAT_DATETIME  "[%x %X] "
+    IDS_LOG_SEVERITY_FATAL   "[FATAL] "
+    IDS_LOG_SEVERITY_ERROR   "[ERROR] "
+    IDS_LOG_SEVERITY_WARNING "[WARNING] "
+    IDS_LOG_SEVERITY_INFO    "[INFO] "
+    IDS_LOG_SEVERITY_DEBUG   "[DEBUG] "
+    IDS_LOG_SEVERITY_VERBOSE "[VERBOSE] "
+END
+
+
+STRINGTABLE
+BEGIN
     IDS_ERROR_TCP_SERVER_CREATE 
-                            "[ERROR] Unable to initialize the main server socket."
+                            "Unable to initialize the main server socket."
     IDS_ERROR_TCP_SERVER_BIND 
-                            "[ERROR] Unable to bind the main server socket on port %hu."
+                            "Unable to bind the main server socket on port %hu."
     IDS_ERROR_TCP_SERVER_LISTEN 
-                            "[ERROR] Unable to start listening to the main server socket."
+                            "Unable to start listening to the main server socket."
     IDS_ERROR_TCP_SERVER_ASYNC 
-                            "[ERROR] Unable to start an asynchronous event listener on the main server socket."
+                            "Unable to start an asynchronous event listener on the main server socket."
     IDS_ERROR_UDP_SERVER_CREATE 
-                            "[ERROR] Unable to initialize the discovery server socket."
+                            "Unable to initialize the discovery server socket."
     IDS_ERROR_UDP_SERVER_BIND 
-                            "[ERROR] Unable to bind the discovery server socket on port %hu."
+                            "Unable to bind the discovery server socket on port %hu."
     IDS_ERROR_UDP_SERVER_ASYNC 
-                            "[ERROR] Unable to start an asynchronous event listener on the discovery server socket."
+                            "Unable to start an asynchronous event listener on the discovery server socket."
     IDS_ERROR_UDP_LEGACY_SERVER_CREATE 
-                            "[ERROR] Unable to initialize the discovery server socket (legacy)."
+                            "Unable to initialize the discovery server socket (legacy)."
     IDS_ERROR_UDP_LEGACY_SERVER_BIND 
-                            "[ERROR] Unable to bind the discovery server socket on port %hu (legacy)."
+                            "Unable to bind the discovery server socket on port %hu (legacy)."
     IDS_ERROR_UDP_LEGACY_SERVER_ASYNC 
-                            "[ERROR] Unable to start an asynchronous event listener on the discovery server socket (legacy)."
+                            "Unable to start an asynchronous event listener on the discovery server socket (legacy)."
+END
+
+STRINGTABLE
+BEGIN
+    IDS_CLIENT_CONNECTED 
+                            "Client <%u> connected."
+    IDS_CLIENT_CONNECTED_ADDRESS 
+                            "Client <%u> connected from '%u.%u.%u.%u'."
+    IDS_CLIENT_DISCONNECTED 
+                            "Client <%u> disconnected."
+    IDS_CLIENT_DISCONNECTED_NET_DOWN 
+                            "Client <%u> disconnected (Network is down)."
+    IDS_CLIENT_DISCONNECTED_RESET
+                            "Client <%u> disconnected (Connection reset by peer)."
+    IDS_CLIENT_DISCONNECTED_TIMEOUT
+                            "Client <%u> disconnected (Timeout)."
+    IDS_CLIENT_DISCONNECTED_HEADER
+                            "Client <%u> disconnected (Invalid header)."
+    IDS_CLIENT_DISCONNECTED_INPUT_BUFFER
+                            "Client <%u> disconnected (Unable to allocate memory for input message)."
+    IDS_CLIENT_DISCONNECTED_OUTPUT_BUFFER
+                            "Client <%u> disconnected (Unable to allocate memory for output message)."
+    IDS_CLIENT_DISCONNECTED_BUILD
+                            "Client <%u> disconnected (Unable to build output message)."
+    IDS_CLIENT_DISCONNECTED_UNKNOWN
+                            "Client <%u> disconnected (Invalid input message)."
+    IDS_CLIENT_DISCONNECTED_DEFAULT
+                            "Client <%u> disconnected (Error: %u)."
+END
+
+STRINGTABLE
+BEGIN
+    IDS_CLIENT_INPUT_UNKNOWN
+                            "Client <%u> unknown message: tag %u, type %u, size %u."
+    IDS_CLIENT_DEBUG_READ_VARIABLE_ASCII
+                            "Client <%u> ReadVariableAscii: <%s> = <%s>."
+    IDS_CLIENT_DEBUG_READ_VARIABLE_ASCIIW
+                            "Client <%u> ReadVariableAscii: <%S> = <%S>."
+    IDS_CLIENT_DEBUG_WRITE_VARIABLE_ASCII
+                            "Client <%u> WriteVariableAscii: <%s> = <%s>."
+    IDS_CLIENT_DEBUG_WRITE_VARIABLE_ASCIIW
+                            "Client <%u> WriteVariableAscii: <%S> = <%S>."
+    IDS_CLIENT_DEBUG_READ_VARIABLE
+                            "Client <%u> ReadVariable: <%S> = <%S>."
+    IDS_CLIENT_DEBUG_READ_VARIABLEW
+                            "Client <%u> ReadVariable: <%s> = <%s>."
+    IDS_CLIENT_DEBUG_WRITE_VARIABLE
+                            "Client <%u> WriteVariable: <%S> = <%S>."
+    IDS_CLIENT_DEBUG_WRITE_VARIABLEW
+                            "Client <%u> WriteVariable: <%s> = <%s>."
+    IDS_CLIENT_INPUT_MESSAGE
+                            "Client <%u> received message: tag %u, type %u, size %u."
+    IDS_CLIENT_OUTPUT_MESSAGE
+                            "Client <%u> sending answer: tag %u, type %u, size %u, error code %u [%s]."
 END
 
 STRINGTABLE
@@ -247,9 +323,11 @@ BEGIN
                             "The discovery server is listening on port %hu."
     IDS_NOTICE_UDP_LEGACY_SERVER_STARTED 
                             "The discovery server (legacy) is listening on port %hu."
-    IDS_ABOUT_INFO          "Version %u.%u %s\r\n\r\nCopyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>\r\nS.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.\r\nAll rights reserved."
+    IDS_ABOUT_INFO          "Version %u.%u.%u %s\r\n\r\n%s\r\n%s.\r\nAll rights reserved."
     IDS_ABOUT_INFO_OPEN_SOURCE "(Open Source)"
     IDS_ABOUT_INFO_PROPRIETARY "(Proprietary)"
+    IDS_ABOUT_INFO_FREEWARE "(Freeware)"
+    IDS_ABOUT_INFO_INTERNAL "(Internal Build)"
     IDS_ABOUT_DISCLAIMER    "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ""AS IS"" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
 END
 

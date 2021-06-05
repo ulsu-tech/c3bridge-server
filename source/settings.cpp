@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -105,12 +105,21 @@ void Settings::load()
         networkUdpLegacyPeer = DefaultUdpLegacyPeer;
     }
 
+    networkIdleTimeout = keyRead(key, _T("NetworkIdleTimeout"),
+        networkIdleTimeout);
+
+    networkMessageTimeout = keyRead(key, _T("NetworkMessageTimeout"),
+        networkMessageTimeout);
+
     networkTcpEnabled = keyReadBool(key, _T("NetworkTcpEnabled"),
         networkTcpEnabled);
     networkUdpEnabled = keyReadBool(key, _T("NetworkUdpEnabled"),
         networkUdpEnabled);
     networkUdpLegacyEnabled = keyReadBool(key, _T("NetworkUdpLegacyEnabled"),
         networkUdpLegacyEnabled);
+
+    logLimit = keyRead(key, _T("LogLimit"), logLimit);
+    logSeverity = keyRead(key, _T("LogSeverity"), logSeverity);
 }
 
 void Settings::reset()
@@ -129,9 +138,14 @@ void Settings::reset()
     networkUdpPort = DefaultUdpPort;
     networkUdpLegacyPort = DefaultUdpLegacyPort;
     networkUdpLegacyPeer = DefaultUdpLegacyPeer;
+    networkIdleTimeout = DefaultTimeout;
+    networkMessageTimeout = DefaultTimeout;
     networkTcpEnabled = true;
     networkUdpEnabled = true;
     networkUdpLegacyEnabled = true;
+
+    logLimit = DefaultLogLimit;
+    logSeverity = DefaultLogSeverity;
 }
 
 void Settings::save()
@@ -186,9 +200,18 @@ void Settings::save()
 
     keyWrite(key, _T("NetworkUdpLegacyPeer"), networkUdpLegacyPeer);
 
+    keyWrite(key, _T("NetworkIdleTimeout"), networkIdleTimeout);
+    keyWrite(key, _T("NetworkMessageTimeout"), networkMessageTimeout);
+
     keyWriteBool(key, _T("NetworkTcpEnabled"), networkTcpEnabled);
     keyWriteBool(key, _T("NetworkUdpEnabled"), networkUdpEnabled);
     keyWriteBool(key, _T("NetworkUdpLegacyEnabled"), networkUdpLegacyEnabled);
+
+    keyWrite(key, _T("LogLimit"), logLimit);
+    keyWrite(key, _T("LogSeverity"), logSeverity);
+
+    if (logSeverity > LimitMaximumSeverity)
+        logSeverity = DefaultLogSeverity;
 }
 
 bool Settings::checkAddress(const Win32xx::CString& address)

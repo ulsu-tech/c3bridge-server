@@ -19,7 +19,7 @@
 			<supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}"/>
 	</application>
 </compatibility>
-<description>Adds XP Theme style to any program</description>
+<description>XP Theme Style Manifest</description>
 <dependency>
     <dependentAssembly>
         <assemblyIdentity

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -35,21 +35,21 @@
 #define MAINWINDOW_H
 
 
-#include "view.h"
-#include "client.h"
 #include "settings.h"
 #include "aboutdialog.h"
+#include "view.h"
+#include "tcpserver.h"
+#include "udpserver.h"
 
 
 class MainWindow : public Win32xx::CFrame
 {
 public:
+    static void addLogLine(LPCTSTR text);
+    static Settings* settings();
+
     MainWindow();
     virtual ~MainWindow();
-
-    void log(LPCTSTR message);
-    void log(UINT messageId);
-    void log(const Win32xx::CString& message);
 
 protected:
     virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
@@ -62,35 +62,20 @@ protected:
     virtual LRESULT WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void onTrayIcon(WPARAM wParam, LPARAM lParam);
-    void onTcpServerEvent(WPARAM wParam, LPARAM lParam);
-    void onTcpSessionEvent(WPARAM wParam, LPARAM lParam);
-    void onUdpServerEvent(WPARAM wParam, LPARAM lParam);
 
 private:
-    bool startTcpServer(LPCTSTR address, UINT port);
-    void stopTcpServer();
-
-    bool startUdpLegacyServer(LPCTSTR address, UINT port);
-    void stopUdpLegacyServer();
-
-    bool startUdpServer(LPCTSTR address, UINT port);
-    void stopUdpServer();
+    void updateLogLevelMenu();
 
 private:
-    static LPCSTR _discoveryWord;
-
+    static MainWindow* _globalPointer;
+    
     View _view;
     Settings _settings;
     AboutDialog _dialogAbout;
 
-    Win32xx::CSocket _server;
-    Win32xx::CSocket _serverUdpLegacy;
-    Win32xx::CSocket _serverUdp;
-
-    std::list<PClient> _clients;
-
-    std::string _robotModelName;
-    std::string _robotSerialNo;
+    TcpServer _server;
+    UdpServer _serverUdp;
+    UdpServer _serverUdpLegacy;
 
     NOTIFYICONDATA _trayIcon;
 };

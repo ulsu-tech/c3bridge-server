@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -45,6 +45,14 @@ class CallbackErrorImplementation;
 class Cross3
 {
 public:
+    struct FileNameList
+    {
+        std::vector<BString> names;
+        std::vector<BString> info;
+        size_t sizeOfNames;
+        size_t sizeOfInfo;
+    };
+
     struct FileProperties
     {
         BString name;
@@ -67,6 +75,12 @@ public:
 public:
     static Cross3* instance();
     static unsigned short getErrorCode(HRESULT result);
+    static bool variantToStringList(VARIANT* variant,
+        std::vector<BString>& output, size_t& total);
+    static bool variantToVector(VARIANT* variant,
+        std::vector<uint8_t>& output);
+    static bool vectorToVariant(const std::vector<uint8_t>& input,
+        VARIANT* variant);
 
     unsigned short getVariable(const std::string& name, std::string& value);
     unsigned short getVariable(const BString& name, BString& value);
@@ -89,7 +103,8 @@ public:
     unsigned short kcpKeyMove6D(bool off);
 
     unsigned short fileSetAttribute(const BString& name, long attribute, long mask);
-    unsigned short fileNameList(const BString& path, long type, long flags);
+    unsigned short fileNameList(const BString& path, long type, long flags,
+        FileNameList& list);
     unsigned short fileCreate(const BString& name, unsigned short itemType, unsigned char modulePart,
         const BString& templateName, bool createAlways);
     unsigned short fileDelete(const BString& name, bool deleteAlways);
@@ -98,7 +113,10 @@ public:
     unsigned short fileGetProperties(const BString& name, long mask, FileProperties& properties);
     unsigned short fileGetFullName(const BString& name, BString& fullName);
     unsigned short fileGetKrcName(const BString& name, BString& krcName);
-    unsigned short fileReadContent(const BString& name, long flags, std::vector<char>& content);
+    unsigned short fileReadContent(const BString& name, long flags,
+        std::vector<uint8_t>& content);
+    unsigned short fileWriteContent(const BString& name, long flags,
+        const std::vector<uint8_t>& content);
 
     unsigned short crossConfirmAll();
 

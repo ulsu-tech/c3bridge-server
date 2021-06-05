@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -47,6 +47,8 @@ public:
     void CopyToClipboard();
     int SelectedItemsCount();
 
+    void setLineLimit(uint32_t limit);
+
 protected:
     virtual void OnAttach();
     virtual void PreCreate(CREATESTRUCT& cs);
@@ -54,6 +56,9 @@ protected:
 private:
     LONG _aveCharWidth;
     LONG _maxTextWidth;
+
+    uint32_t _lineCount;
+    uint32_t _lineLimit;
 };
 
 

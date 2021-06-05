@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -31,38 +31,72 @@
  */
 
 
-#include "stdafx.h"
-#include "utilities.h"
+#ifndef MESSAGEREADER_H
+#define MESSAGEREADER_H
 
 
-Win32xx::CString Utilities::getComputerName()
+class BString;
+
+
+class MessageReader
 {
-    DWORD size = 0;
+public:
+    enum ByteOrder
+    {
+        BigEndian,
+        LittleEndian
+    };
 
-    GetComputerName(NULL, &size);
+public:
+    MessageReader(char* data, size_t size, ByteOrder order = BigEndian);
 
-    Win32xx::CString result;
+    void reset(char* data, size_t size);
 
-    GetComputerName(result.GetBuffer(size), &size);
+    bool getUInt8(uint8_t& value);
+    bool getUInt16(uint16_t& value);
+    bool getUInt32(uint32_t& value);
 
-    result.ReleaseBuffer();
+    bool getBool(bool& value);
+    bool getInt8(int8_t& value);
+    bool getInt16(int16_t& value);
+    bool getInt32(int32_t& value);
 
-    return result;
+    bool getString(std::string& value, size_t size);
+    bool getWString(std::wstring& value, size_t size);
+    bool getBString(BString& value, size_t size);
+
+    bool getArray(uint8_t* value, size_t size);
+
+    bool getStringWithSize(std::string& value);
+    bool getWStringWithSize(std::wstring& value);
+    bool getBStringWithSize(BString& value);
+
+private:
+    ByteOrder _currentOrder;
+    ByteOrder _systemOrder;
+
+    char*    _data;
+
+    size_t   _offset;
+    size_t   _size;
+    bool     _error;
+};
+
+
+inline bool MessageReader::getInt8(int8_t& value)
+{
+    return getUInt8(reinterpret_cast<uint8_t&>(value));
 }
 
-Win32xx::CString Utilities::getIsoDateTime()
+inline bool MessageReader::getInt16(int16_t& value)
 {
-    SYSTEMTIME time;
-    ::GetSystemTime(&time);
-
-    Win32xx::CString result;
-
-    // ISO 8601 extended format yyyy-MM-ddTHH:mm:ss
-    // with a time-zone suffix (Z for UTC)
-    // Example: 2020-06-25T12:14:00Z
-    result.Format(_T("%.4hu-%.2hu-%.2huT%.2hu:%.2hu:%.2huZ"),
-        time.wYear, time.wMonth, time.wDay,
-        time.wHour, time.wMinute, time.wSecond);
-    
-    return result;
+    return getUInt16(reinterpret_cast<uint16_t&>(value));
 }
+
+inline bool MessageReader::getInt32(int32_t& value)
+{
+    return getUInt32(reinterpret_cast<uint32_t&>(value));
+}
+
+
+#endif // MESSAGEREADER_H

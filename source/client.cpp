@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -36,22 +36,271 @@
 #include <c3bi.h>
 
 #include "client.h"
-#include "ringstream.h"
-#include "bufferstream.h"
+
+#include "log.h"
 #include "cross3.h"
-#include "proxy.h"
-#include "utilities.h"
 #include "bstring.h"
+#include "memoryallocator.h"
+#include "messagebuilder.h"
+#include "messagereader.h"
+#include "proxy.h"
+#include "resource.h"
 
 
-Client::Client()
-    : _inputBuffer(InputBufferSize)
-    , _outputBuffer(OutputBufferSize)
+//
+// Static Members
+//
+Client::Handler Client::_handlers[Client::TotalHandlers] = {};
+
+
+//
+// Static Methods
+//
+void Client::registerHandlers()
 {
+    memset(_handlers, 0, sizeof(_handlers));
+
+    // Variables Handling
+    _handlers[C3BI::CommandReadVariableAscii] = &handleReadVariableAscii;
+    _handlers[C3BI::CommandWriteVariableAscii] = &handleWriteVariableAscii;
+    _handlers[C3BI::CommandReadVariable] = &handleReadVariable;
+    _handlers[C3BI::CommandWriteVariable] = &handleWriteVariable;
+    _handlers[C3BI::CommandReadMultiple] = &handleReadMultiple;
+    _handlers[C3BI::CommandWriteMultiple] = &handleWriteMultiple;
+
+    // Program Handling
+    _handlers[C3BI::CommandProgramControl] = &handleProgramState;
+
+    // Motion Handling
+    _handlers[C3BI::CommandMotion] = &handleMotion;
+
+    // KCP Key Handling
+    _handlers[C3BI::CommandKcpAction] = &handleKcpAction;
+
+    // Proxy Information Handling
+    _handlers[C3BI::CommandProxyInfo] = &handleProxyInfo;
+    _handlers[C3BI::CommandProxyFeatures] = &handleProxyFeatures;
+    _handlers[C3BI::CommandProxyBenchmark] = &handleBenchmark;
+
+    // File Handling
+    _handlers[C3BI::CommandFileSetAttribute] = &handleFileSetAttribute;
+    _handlers[C3BI::CommandFileNameList] = &handleFileNameList;
+    _handlers[C3BI::CommandFileCreate] = &handleFileCreate;
+    _handlers[C3BI::CommandFileDelete] = &handleFileDelete;
+    _handlers[C3BI::CommandFileCopy] = &handleFileCopy;
+    _handlers[C3BI::CommandFileMove] = &handleFileMove;
+    _handlers[C3BI::CommandFileGetProperties] = &handleFileGetProperties;
+    _handlers[C3BI::CommandFileGetFullName] = &handleFileGetFullName;
+    _handlers[C3BI::CommandFileGetKrcName] = &handleFileGetKrcName;
+    _handlers[C3BI::CommandFileWriteContent] = &handleFileWriteContent;
+    _handlers[C3BI::CommandFileReadContent] = &handleFileReadContent;
+
+    // CrossCommEXE Functions Handling
+    _handlers[C3BI::CommandCrossConfirmAll] = &handleCrossConfirmAll;
+}
+
+
+//
+// Regular Methods
+//
+Client::Client(HWND window, UINT messageId, uint32_t id)
+    : _window(window)
+    , _messageId(messageId)
+    , _id(id)
+    , _timeout(0)
+    , _timeoutIdle(0)
+    , _timeoutMessage(0)
+    , _elapsed(0)
+    , _ignoreEvents(false)
+{
+    memset(&_input, 0, sizeof(_input));
+    memset(&_output, 0, sizeof(_output));
+
+    _output.completed = true;
 }
 
 Client::~Client()
 {
+    MemoryAllocator::deallocate(reinterpret_cast<void**>(&_input.buffer));
+    MemoryAllocator::deallocate(reinterpret_cast<void**>(&_output.buffer));    
+}
+
+void Client::checkTimeout(uint32_t elapsed)
+{
+    if (_timeout > 0 && elapsed - _elapsed >= _timeout)
+        performDisconnect(ErrorTimeout);
+}
+
+void Client::setEvents(long events)
+{
+#ifdef _MSC_VER
+#pragma warning ( push )
+#pragma warning ( disable : 4996 )
+    ::WSAAsyncSelect(*this, _window, _messageId, events);
+#pragma warning ( pop )
+#endif // _MSC_VER
+}
+
+void Client::setIdleTimeout(uint32_t value)
+{
+    _timeout = value;
+    _timeoutIdle = value;
+    _elapsed = ::GetTickCount();
+}
+
+void Client::setMessageTimeout(uint32_t value)
+{
+    _timeoutMessage = value;
+    _elapsed = ::GetTickCount();
+}
+
+void Client::OnDisconnect(uint16_t reason)
+{
+    _fileIn.clear();
+    _fileOut.clear();
+
+    switch (reason)
+    {
+        case WSAENETDOWN:
+            Log::format(Log::Info, IDS_CLIENT_DISCONNECTED_NET_DOWN, _id);
+            break;
+
+        case WSAECONNABORTED:
+        case WSAECONNRESET:
+            Log::format(Log::Info, IDS_CLIENT_DISCONNECTED_RESET, _id);
+            break;
+
+        case ErrorNone:
+            Log::format(Log::Info, IDS_CLIENT_DISCONNECTED, _id);
+            break;
+
+        case ErrorTimeout:
+            Log::format(Log::Info, IDS_CLIENT_DISCONNECTED_TIMEOUT, _id);
+            break;
+
+        case ErrorHeader:
+            Log::format(Log::Info, IDS_CLIENT_DISCONNECTED_HEADER, _id);
+            break;
+
+        case ErrorInputBuffer:
+            Log::format(Log::Info, IDS_CLIENT_DISCONNECTED_INPUT_BUFFER, _id);
+            break;
+
+        case ErrorOutputBuffer:
+            Log::format(Log::Info, IDS_CLIENT_DISCONNECTED_OUTPUT_BUFFER, _id);
+            break;
+
+        case ErrorBuildMessage:
+            Log::format(Log::Info, IDS_CLIENT_DISCONNECTED_BUILD, _id);
+            break;
+
+        case ErrorUnknownInput:
+            Log::format(Log::Info, IDS_CLIENT_DISCONNECTED_UNKNOWN, _id);
+            break;
+
+        default:
+            Log::format(Log::Info, IDS_CLIENT_DISCONNECTED_DEFAULT, _id,
+                reason);
+            break;
+    }
+}
+
+void Client::OnReceive()
+{
+    if (_ignoreEvents)
+        return;
+
+    if (bytesAvailable() == 0)
+    {
+        // Re-enable FD_READ signal
+        char byte;
+        Receive(&byte, sizeof(byte), MSG_PEEK);
+        return;
+    }
+
+    // The reply to the previous message is still being sent
+    // Reject all incoming data
+    if (!_output.completed)
+    {
+        dropPendingData();
+        return;
+    }
+
+    if (!onHeader())
+        return;
+
+    if (!onCollect())
+        return;
+
+    MessageReader reader(_input.buffer, _input.size);
+
+    MemoryAllocator::reallocate(reinterpret_cast<void**>(&_output.buffer),
+        MessageBuilder::MaximumMessage);
+
+    if (!_output.buffer)
+    {
+        performDisconnect(ErrorOutputBuffer);
+        return;
+    }
+
+    _output.offset = 0;
+    _output.size = 0;
+    _output.completed = true;
+
+    MessageBuilder output(_output.buffer, MessageBuilder::MaximumMessage);
+    output.setTag(_input.tag);
+    output.setType(_input.type);
+
+    Log::format(Log::Verbose, IDS_CLIENT_INPUT_MESSAGE, _id, _input.tag,
+        _input.type, _input.size);
+
+    if (_handlers[_input.type])
+        (this->*(_handlers[_input.type]))(reader, output);
+
+    MemoryAllocator::deallocate(reinterpret_cast<void**>(&_input.buffer));
+
+    if (_output.completed)
+        MemoryAllocator::deallocate(reinterpret_cast<void**>(&_output.buffer));
+
+    _timeout = _timeoutIdle;
+    _elapsed = ::GetTickCount();
+}
+
+void Client::OnSend()
+{
+    if (_ignoreEvents)
+        return;
+
+    if (_output.completed)
+    {
+        MemoryAllocator::deallocate(reinterpret_cast<void**>(&_output.buffer));
+        return;
+    }
+
+    size_t rest = _output.size - _output.offset;
+
+    while (rest > 0)
+    {
+        int result = Send(&_output.buffer[_output.offset],
+            static_cast<int>(rest), 0);
+
+        if (result <= 0)
+        {
+            uint16_t reason = static_cast<uint16_t>(::WSAGetLastError());
+            if (reason != WSAEWOULDBLOCK)
+                performDisconnect(reason);
+
+            return;
+        }
+
+        _output.offset += static_cast<size_t>(result);
+        rest -= static_cast<size_t>(result);
+    }
+
+    MemoryAllocator::deallocate(reinterpret_cast<void**>(&_output.buffer));
+    _output.offset = 0;
+    _output.size = 0;
+    _output.completed = true;
 }
 
 size_t Client::bytesAvailable() const
@@ -64,499 +313,161 @@ size_t Client::bytesAvailable() const
     return static_cast<size_t>(result);
 }
 
-void Client::OnDisconnect()
+void Client::performDisconnect(uint16_t reason)
 {
+    _ignoreEvents = true;
+
+    setEvents(0);
+    ::PostMessage(_window, _messageId, static_cast<WPARAM>(GetSocket()),
+        MAKELONG(FD_CLOSE, reason));
 }
 
-void Client::OnReceive()
+void Client::dropPendingData()
 {
-    size_t available = bytesAvailable();
+    setEvents(FD_WRITE | FD_CLOSE);
 
-    if (available == 0 || available > _inputBuffer.bytesFree())
-        return;
+    char abyss[AbyssSize];
 
-    char intermediate[256];
+    int received = 1;
 
-    int received = Receive(intermediate, sizeof(intermediate), 0);
+    while (received > 0)
+    {
+        received = Receive(abyss, sizeof(abyss), 0);
+    }
+
+    setEvents(FD_READ | FD_WRITE | FD_CLOSE);
+
+    // Re-enable FD_READ signal
+    Receive(abyss, sizeof(abyss), 0);
+}
+
+void Client::reply(MessageBuilder& message)
+{
+    if (message.build())
+    {
+        _output.offset = 0;
+        _output.size = message.size();
+        _output.completed = false;
+
+        Log::format(Log::Verbose, IDS_CLIENT_OUTPUT_MESSAGE, _id, message.tag(),
+            message.type(), message.size() - MessageBuilder::HeaderSize -
+            MessageBuilder::TypeSize, message.errorCode(),
+            message.successFlag() ? _T("SUCCESS") : _T("FAILURE"));
+
+        OnSend();
+    }
+    else
+    {
+        performDisconnect(ErrorBuildMessage);
+    }
+}
+
+bool Client::onHeader()
+{
+    if (_input.headerReceived)
+        return true;
+
+    size_t rest = 0;
+
+    if (_input.offset < HeaderSize)
+        rest = HeaderSize - _input.offset;
+
+    int received = Receive(&_input.header[_input.offset],
+        static_cast<int>(rest), 0);
+
     if (received <= 0)
     {
-        // TODO: Handle this!
-        return;
+        uint16_t reason = static_cast<uint16_t>(::WSAGetLastError());
+        if (reason != WSAEWOULDBLOCK)
+            performDisconnect(reason);
+
+        return false;
     }
 
-    _inputBuffer.put(intermediate, static_cast<size_t>(received));
+    _input.offset += static_cast<size_t>(received);
 
-    RingStream stream(_inputBuffer, RingStream::BigEndian);
+    if (_input.offset < HeaderSize)
+        return false;
 
-    while (stream.available(2 * sizeof(WORD)))
+    MessageReader reader(_input.header, HeaderSize);
+    reader.getUInt16(_input.tag);
+    reader.getUInt16(_input.size);
+    reader.getUInt8(_input.type);
+
+    if (_input.size == 0)
     {
-        WORD id = 0;
-        WORD length = 0;
+        performDisconnect(ErrorHeader);
+        return false;
+    }
 
-        stream.get(id);
-        stream.get(length);
+    // Remove size of (_input.type)
+    _input.size -= sizeof(_input.type);
 
-        if (!stream.available(static_cast<size_t>(length)))
-            break;
+    if (!_handlers[_input.type])
+    {
+        Log::format(Log::Debug, IDS_CLIENT_INPUT_UNKNOWN, _id, _input.tag,
+            _input.type, _input.size);
+        performDisconnect(ErrorUnknownInput);
+        return false;
+    }
 
-        if (length)
+    if (_input.size > MinimumSize)
+    {
+        MemoryAllocator::reallocate(
+            reinterpret_cast<void**>(&_input.buffer), _input.size);
+    }
+    else if (_input.size > 0)
+    {
+        MemoryAllocator::reallocate(
+            reinterpret_cast<void**>(&_input.buffer), MinimumSize);
+    }
+
+    _input.offset = 0;
+    _input.headerReceived = true;
+
+    _timeout = _timeoutMessage;
+
+    if (_timeout == 0)
+        _timeout = _timeoutIdle;
+
+    _elapsed = ::GetTickCount();
+
+    return true;
+}
+
+bool Client::onCollect()
+{
+    if (_input.size > 0)
+    {
+        if (!_input.buffer)
         {
-            BYTE type = 0;
-            stream.get(type);
-
-            switch (type)
-            {
-            // Variables Handling
-            case C3BI::CommandReadVariableAscii:
-                handleReadVariableAscii(id, stream);
-                break;
-            case C3BI::CommandWriteVariableAscii:
-                handleWriteVariableAscii(id, stream);
-                break;
-            case C3BI::CommandReadArrayAscii:
-            case C3BI::CommandWriteArrayAscii:
-                break;
-            case C3BI::CommandReadVariable:
-                handleReadVariable(id, stream);
-                break;
-            case C3BI::CommandWriteVariable:
-                handleWriteVariable(id, stream);
-                break;
-            case C3BI::CommandReadMultiple:
-                handleReadMultiple(id, stream);
-                break;
-            case C3BI::CommandWriteMultiple:
-                handleWriteMultiple(id, stream);
-                break;
-
-            // Program Handling
-            case C3BI::CommandProgramControl:
-                handleProgramState(id, stream);
-                break;
-
-            // Motion Handling
-            case C3BI::CommandMotion:
-                handleMotion(id, stream);
-                break;
-
-            // KCP Key Handling
-            case C3BI::CommandKcpAction:
-                handleKcpAction(id, stream);
-                break;
-
-            // Proxy Information Handling
-            case C3BI::CommandProxyInfo:
-                handleProxyInfo(id, stream);
-                break;
-
-            case C3BI::CommandProxyFeatures:
-                handleProxyFeatures(id, stream);
-                break;
-
-            /*
-             * These capabilities have not been tested and can be dangerous.
-            // File Handling
-            case C3BI::CommandFileSetAttribute:
-                handleFileSetAttribute(id, stream);
-                break;
-
-            case C3BI::CommandFileNameList:
-                handleFileNameList(id, stream);
-                break;
-
-            case C3BI::CommandFileCreate:
-                handleFileCreate(id, stream);
-                break;
-
-            case C3BI::CommandFileDelete:
-                handleFileDelete(id, stream);
-                break;
-
-            case C3BI::CommandFileCopy:
-                handleFileCopy(id, stream);
-                break;
-
-            case C3BI::CommandFileMove:
-                handleFileMove(id, stream);
-                break;
-
-            case C3BI::CommandFileGetProperties:
-                handleFileGetProperties(id, stream);
-                break;
-
-            case C3BI::CommandFileGetFullName:
-                handleFileFileGetFullName(id, stream);
-                break;
-
-            case C3BI::CommandFileGetKrcName:
-                handleFileFileGetKrcName(id, stream);
-                break;
-
-            case C3BI::CommandFileWriteContent:
-                handleFileFileWriteContent(id, stream);
-                break;
-
-            case C3BI::CommandFileReadContent:
-                handleFileFileReadContent(id, stream);
-                break;
-             */
-
-            // CrossCommEXE Functions Handling
-            case C3BI::CommandCrossConfirmAll:
-                handleCrossConfirmAll(id, stream);
-                break;
-
-            default:
-                break;
-            }
+            performDisconnect(ErrorInputBuffer);
+            return false;
         }
 
-        _inputBuffer.skip(static_cast<size_t>(length) + 2 * sizeof(WORD));
+        int received = Receive(&_input.buffer[_input.offset], _input.size - _input.offset, 0);
 
-        stream.reset();
-    }
-}
-
-void Client::OnSend()
-{
-}
-
-void Client::handleProgramState(WORD id, RingStream& stream)
-{
-    bool ok = true;
-    WORD code = C3BI::ErrorProtocol;
-
-    BYTE command = C3BI::ProgramNone;
-    SHORT submitIndex = 0;
-
-    WORD size = 0;
-    bool boolean = false;
-
-    BString name;
-    BString parameters;
-
-    ok = stream.get(command);
-    ok = ok ? stream.get(submitIndex) : false;
-
-    switch (command)
-    {
-    case C3BI::ProgramReset:
-        if (ok)
-            code = Cross3::instance()->programReset(submitIndex);
-
-        break;
-    case C3BI::ProgramStart:
-        if (ok)
-            code = Cross3::instance()->programStart(submitIndex);
-
-        break;
-    case C3BI::ProgramStop:
-        if (ok)
-            code = Cross3::instance()->programStop(submitIndex);
-
-        break;
-    case C3BI::ProgramCancel:
-        if (ok)
-            code = Cross3::instance()->programCancel(submitIndex);
-
-        break;
-    case C3BI::ProgramSelect:
-        ok = ok ? stream.get(size) : false;
-        ok = (ok && size > 0) ? stream.get(name, size) : false;
-        ok = ok ? stream.get(size) : false;
-        ok = (ok && size > 0) ? stream.get(parameters, size) : false;
-        ok = ok ? stream.get(boolean) : false;
-
-        if (ok)
-            code = Cross3::instance()->programSelect(name, parameters, boolean);
-
-        break;
-
-    case C3BI::ProgramRun:
-        ok = ok ? stream.get(size) : false;
-        ok = (ok && size > 0) ? stream.get(name, size) : false;
-        ok = ok ? stream.get(size) : false;
-        ok = (ok && size > 0) ? stream.get(parameters, size) : false;
-        ok = ok ? stream.get(boolean) : false;
-
-        if (ok)
-            code = Cross3::instance()->programRun(name, parameters, boolean);
-
-        break;
-
-    default:
-        if (ok)
-            code = C3BI::ErrorNotImplemented;
-
-        break;
-    }
-
-    ok = (code == C3BI::ErrorSuccess);
-
-    //
-    // ANSWER
-    //
-    BufferStream output(_outputBuffer, BufferStream::BigEndian);
-
-    // Empty header
-    output.skip(2 * sizeof(WORD));
-    size_t payloadSize = output.size();
-
-    // Payload type
-    output.append(static_cast<BYTE>(C3BI::CommandProgramControl));
-
-    // Payload data
-    output.append(command);
-
-    // Error code
-    output.append(code);
-    output.append(ok);
-
-    payloadSize = output.size() - payloadSize;
-
-    if (payloadSize <= 0xFFFF)
-    {
-        // Fill header
-        output.set(0, id);
-        output.set(sizeof(WORD), static_cast<WORD>(payloadSize));
-
-        Send(output.data(), static_cast<int>(output.size()), 0);
-    }
-}
-
-void Client::handleMotion(WORD id, RingStream& stream)
-{
-    bool ok = true;
-    WORD code = C3BI::ErrorProtocol;
-
-    BYTE command = C3BI::MotionNone;
-    WORD size = 0;
-
-    BString position;
-
-    ok = stream.get(command);
-    ok = ok ? stream.get(size) : false;
-    ok = (ok && size > 0) ? stream.get(position, size) : false;
-
-    if (ok)
-    {
-        switch (command)
+        if (received <= 0)
         {
-        case C3BI::MotionPtp:
-            code = Cross3::instance()->motionPtp(position, false);
-            break;
-        case C3BI::MotionPtpRelative:
-            code = Cross3::instance()->motionPtp(position, true);
-            break;
-        case C3BI::MotionLin:
-            code = Cross3::instance()->motionLin(position, false);
-            break;
-        case C3BI::MotionLinRelative:
-            code = Cross3::instance()->motionLin(position, true);
-            break;
-        default:
-            code = C3BI::ErrorNotImplemented;
-            break;
+            uint16_t reason = static_cast<uint16_t>(::WSAGetLastError());
+            if (reason != WSAEWOULDBLOCK)
+                performDisconnect(reason);
+
+            return false;
         }
+
+        _elapsed = ::GetTickCount();
+
+        _input.offset += static_cast<size_t>(received);
     }
 
-    ok = (code == C3BI::ErrorSuccess);
+    if (_input.offset < _input.size)
+        return false;
 
-    //
-    // ANSWER
-    //
-    BufferStream output(_outputBuffer, BufferStream::BigEndian);
+    _input.offset = 0;
+    _input.headerReceived = false;
 
-    // Empty header
-    output.skip(2 * sizeof(WORD));
-    size_t payloadSize = output.size();
+    _timeout = 0;
 
-    // Payload type
-    output.append(static_cast<BYTE>(C3BI::CommandMotion));
-
-    // Payload data
-    output.append(command);
-
-    // Error code
-    output.append(code);
-    output.append(ok);
-
-    payloadSize = output.size() - payloadSize;
-
-    if (payloadSize <= 0xFFFF)
-    {
-        // Fill header
-        output.set(0, id);
-        output.set(sizeof(WORD), static_cast<WORD>(payloadSize));
-
-        Send(output.data(), static_cast<int>(output.size()), 0);
-    }
-}
-
-void Client::handleKcpAction(WORD id, RingStream& stream)
-{
-    bool ok = true;
-    WORD code = C3BI::ErrorProtocol;
-
-    BYTE command = C3BI::KcpActionNone;
-
-    INT32 interpreter = 0;
-    INT32 axis = 0;
-    INT32 key = 0;
-
-    bool off = false;
-    bool direction = false;
-
-    ok = stream.get(command);
-    ok = ok ? stream.get(interpreter) : false;
-    axis = interpreter; // Same value position for Interpreter or Axis inside the message
-
-    ok = ok ? stream.get(key) : false;
-    ok = ok ? stream.get(direction) : false;
-    ok = ok ? stream.get(off) : false;
-
-    if (ok)
-    {
-        switch (command)
-        {
-        case C3BI::KcpActionStart:
-            code = Cross3::instance()->kcpKeyStart(interpreter, direction, off);
-            break;
-        case C3BI::KcpActionStop:
-            code = Cross3::instance()->kcpKeyStop(interpreter, off);
-            break;
-        case C3BI::KcpActionMove:
-            code = Cross3::instance()->kcpKeyMove(axis, key, direction, off);
-            break;
-        case C3BI::KcpActionMove6D:
-            code = Cross3::instance()->kcpKeyMove6D(off);
-            break;
-        default:
-            code = C3BI::ErrorNotImplemented;
-            break;
-        }
-    }
-
-    ok = (code == C3BI::ErrorSuccess);
-
-    //
-    // ANSWER
-    //
-    BufferStream output(_outputBuffer, BufferStream::BigEndian);
-
-    // Empty header
-    output.skip(2 * sizeof(WORD));
-    size_t payloadSize = output.size();
-
-    // Payload type
-    output.append(static_cast<BYTE>(C3BI::CommandKcpAction));
-
-    // Payload data
-    output.append(command);
-
-    // Error code
-    output.append(code);
-    output.append(ok);
-
-    payloadSize = output.size() - payloadSize;
-
-    if (payloadSize <= 0xFFFF)
-    {
-        // Fill header
-        output.set(0, id);
-        output.set(sizeof(WORD), static_cast<WORD>(payloadSize));
-
-        Send(output.data(), static_cast<int>(output.size()), 0);
-    }
-}
-
-void Client::handleProxyInfo(WORD id, RingStream& stream)
-{
-    bool ok = true;
-    WORD code = C3BI::ErrorSuccess;
-
-    SYSTEMTIME time;
-    ::GetSystemTime(&time);
-
-    BString computerName = Utilities::getComputerName().c_str();
-
-    //
-    // ANSWER
-    //
-    BufferStream output(_outputBuffer, BufferStream::BigEndian);
-
-    // Empty header
-    output.skip(2 * sizeof(WORD));
-    size_t payloadSize = output.size();
-
-    // Payload type
-    output.append(static_cast<BYTE>(C3BI::CommandProxyInfo));
-
-    // Payload data
-    output.append(static_cast<BYTE>(Proxy::VersionMajor));
-    output.append(static_cast<BYTE>(Proxy::VersionMinor));
-    output.append(static_cast<BYTE>(Proxy::VersionType));
-    output.append(time.wYear);
-    output.append(time.wMonth);
-    output.append(time.wDayOfWeek);
-    output.append(time.wDay);
-    output.append(time.wHour);
-    output.append(time.wMinute);
-    output.append(time.wSecond);
-    output.append(time.wMilliseconds);
-    // Computer name
-    output.append(static_cast<WORD>(computerName.length()));
-    output.append(computerName);
-
-    // Error code
-    output.append(code);
-    output.append(ok);
-
-    payloadSize = output.size() - payloadSize;
-
-    if (payloadSize <= 0xFFFF)
-    {
-        // Fill header
-        output.set(0, id);
-        output.set(sizeof(WORD), static_cast<WORD>(payloadSize));
-
-        Send(output.data(), static_cast<int>(output.size()), 0);
-    }
-}
-
-void Client::handleProxyFeatures(WORD id, RingStream& stream)
-{
-    bool ok = true;
-    WORD code = C3BI::ErrorSuccess;
-
-    //
-    // ANSWER
-    //
-    BufferStream output(_outputBuffer, BufferStream::BigEndian);
-
-    // Empty header
-    output.skip(2 * sizeof(WORD));
-    size_t payloadSize = output.size();
-
-    // Payload type
-    output.append(static_cast<BYTE>(C3BI::CommandProxyFeatures));
-
-    // Payload data
-    for (BYTE index = 32; index > 0; --index)
-        output.append(Proxy::getFeatureOctet(index - 1));
-
-    // Error code
-    output.append(code);
-    output.append(ok);
-
-    payloadSize = output.size() - payloadSize;
-
-    if (payloadSize <= 0xFFFF)
-    {
-        // Fill header
-        output.set(0, id);
-        output.set(sizeof(WORD), static_cast<WORD>(payloadSize));
-
-        Send(output.data(), static_cast<int>(output.size()), 0);
-    }
+    return true;
 }
