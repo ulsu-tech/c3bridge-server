@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.2.0] (Open Source) - 2021-06-05
+### Added
+  - Log Level menu for switching logging modes while the server is running
+  - New features:
+    * CommandProxyBenchmark
+  - New internal variables:
+    * @PROXY_ADDRESS
+    * @PROXY_PORT
+    * @PROXY_ENABLED
+### Changed
+  - An interpreter number other than Sumbit (0) and Robot (1) in messages #10 Program Control and #12 KCP Key Emulation can be specified
+  - CMake build system can be used
+  - Updated protocol documentation
+### Fixed
+  - CommandReadMultiple now works correctly
+  - CommandWriteMultiple now works correctly
+
 ## [1.1.2] (Freeware) - 2021-03-19
 Freeware version released together with C3 Easy Control
 ### Added
