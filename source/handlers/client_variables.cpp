@@ -356,7 +356,7 @@ void Client::handleWriteMultiple(MessageReader& stream, MessageBuilder& output)
         output.putBStringWithSize(value);
     }
 
-    if (!ok)
+    if (ok)
     {
         ok = !error;
         code = error ? C3BI::ErrorGeneral : C3BI::ErrorSuccess;

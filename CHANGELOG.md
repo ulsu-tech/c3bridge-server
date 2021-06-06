@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.3.0] (Open Source) - 2021-06-06
+Bug Fix Release
+### Fixed
+  - CommandWriteMultiple now works correctly
+
 ## [1.2.0] (Open Source) - 2021-06-05
 ### Added
   - Log Level menu for switching logging modes while the server is running
@@ -15,7 +20,8 @@
   - Updated protocol documentation
 ### Fixed
   - CommandReadMultiple now works correctly
-  - CommandWriteMultiple now works correctly
+### Known issues
+  - CommandWriteMultiple is implemented incorrectly
 
 ## [1.1.2] (Freeware) - 2021-03-19
 Freeware version released together with C3 Easy Control

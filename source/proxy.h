@@ -50,7 +50,7 @@
 #define PROXY_VERSION_INTERNAL    3
 
 #define PROXY_VERSION_MAJOR       1
-#define PROXY_VERSION_MINOR       2
+#define PROXY_VERSION_MINOR       3
 #define PROXY_VERSION_TYPE        PROXY_VERSION_OPEN_SOURCE
 
 #define PROXY_STR_HELPER(x)       #x
