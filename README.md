@@ -35,4 +35,4 @@ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR P
 ## Donate
 If you found this software useful, you can thank the author with donations via
 
-[![PayPal](https://github.com/ulsu-tech/c3bridge-server/raw/master/artwork/donate.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=vdm.inbox@gmail.com&lc=EN&item_name=C3BridgeInterface&no_note=0&currency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted) [![Yandex.Money](https://github.com/ulsu-tech/c3bridge-server/raw/master/artwork/donate_yandex.png)](https://money.yandex.ru/to/4100111653323774)
+[![PayPal](https://github.com/ulsu-tech/c3bridge-server/raw/master/artwork/donate.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=vdm.inbox@gmail.com&lc=EN&item_name=C3BridgeInterface&no_note=0&currency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted) [![Yoo Money](https://github.com/ulsu-tech/c3bridge-server/raw/master/artwork/donate_yoo.png)](https://money.yandex.ru/to/4100111653323774)
