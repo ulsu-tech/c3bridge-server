@@ -5,6 +5,9 @@
 #define IDW_MAIN                        41
 #define IDW_ABOUT                       42
 
+#define IDW_MAIN_ANSI                   2041
+#define IDW_MAIN_COMPAT                 3041
+
 #define IDM_FILE_EXIT                   110
 #define IDM_EDIT_COPY                   111
 #define IDM_EDIT_CLEAR                  112

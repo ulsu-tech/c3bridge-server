@@ -120,6 +120,9 @@
     <ClCompile Include="source\settings.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
+    <ClCompile Include="source\safe.cpp">
+      <Filter>Source Files\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\resource.h">
@@ -184,6 +187,9 @@
     </ClInclude>
     <ClInclude Include="source\settings.h">
       <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="source\safe.h">
+      <Filter>Source Files\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

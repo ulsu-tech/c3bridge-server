@@ -33,50 +33,10 @@
 
 #include "stdafx.h"
 
-#include "aboutdialog.h"
-#include "resource.h"
-#include "proxy.h"
+#include "safe.h"
 
 
-AboutDialog::AboutDialog()
-    : Win32xx::CDialog(IDW_ABOUT)
+bool Safe::CheckAdd(uint32_t left, uint32_t right)
 {
-
-}
-
-BOOL AboutDialog::OnInitDialog()
-{
-    Win32xx::CString type;
-
-#if (PROXY_VERSION_TYPE == PROXY_VERSION_OPEN_SOURCE)
-    type.LoadString(IDS_ABOUT_INFO_OPEN_SOURCE);
-#elif (PROXY_VERSION_TYPE == PROXY_VERSION_PROPRIETARY)
-    type.LoadString(IDS_ABOUT_INFO_PROPRIETARY);
-#elif (PROXY_VERSION_TYPE == PROXY_VERSION_FREEWARE)
-    type.LoadString(IDS_ABOUT_INFO_FREEWARE);
-#elif (PROXY_VERSION_TYPE == PROXY_VERSION_INTERNAL)
-    type.LoadString(IDS_ABOUT_INFO_INTERNAL);
-#endif
-
-    Win32xx::CString text;
-    text.Format(IDS_ABOUT_INFO,
-        PROXY_VERSION_MAJOR, PROXY_VERSION_MINOR, PROXY_VERSION_TYPE,
-        type.c_str(), _T(PROXY_COPYRIGHT), _T(PROXY_COMPANY));
-    SetDlgItemText(IDC_INFO, text.c_str());
-
-#if defined(_UNICODE) || defined(UNICODE)
-# if defined(RC_LEGACY)
-    text.LoadString(IDW_MAIN_COMPAT);
-# else // defined(RC_LEGACY)
-    text.LoadString(IDW_MAIN);
-# endif // defined(RC_LEGACY)
-#else // defined(_UNICODE) || defined(UNICODE)
-    text.LoadString(IDW_MAIN_ANSI);
-#endif // defined(_UNICODE) || defined(UNICODE)
-    SetDlgItemText(IDC_TITLE, text.c_str());
-
-    text.LoadString(IDS_ABOUT_DISCLAIMER);
-    SetDlgItemText(IDC_DISCLAIMER, text.c_str());
-
-    return TRUE;
+    return ((~left) >= right);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2022 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -36,12 +36,34 @@
 
 
 #define PROXY_TYPE                "C3 BRIDGE INTERFACE"
-#define PROXY_NAME                "C3 Bridge Interface Server"
+
+#if defined(_UNICODE) || defined(UNICODE)
+
+# if defined(RC_LEGACY)
+
+#  define PROXY_NAME                "C3 Bridge Interface Server (Compatible)"
+#  define PROXY_INTERNALNAME        "C3BCOMPT"
+#  define PROXY_FILENAME            "C3BCOMPT.EXE"
+
+# else // defined(RC_LEGACY)
+
+#  define PROXY_NAME                "C3 Bridge Interface Server"
+#  define PROXY_INTERNALNAME        "C3BRIDGE"
+#  define PROXY_FILENAME            "C3BRIDGE.EXE"
+
+# endif // defined(RC_LEGACY)
+
+#else // defined(_UNICODE) || defined(UNICODE)
+
+# define PROXY_NAME                "C3 Bridge Interface Server (ANSI)"
+# define PROXY_INTERNALNAME        "C3BANSI"
+# define PROXY_FILENAME            "C3BANSI.EXE"
+
+#endif // defined(_UNICODE) || defined(UNICODE)
+
 #define PROXY_PRODUCT             "C3 Bridge Interface"
 #define PROXY_COMPANY             "S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University"
-#define PROXY_COPYRIGHT           "Copyright (C) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>"
-#define PROXY_INTERNALNAME        "C3BRIDGE"
-#define PROXY_FILENAME            "C3BRIDGE.EXE"
+#define PROXY_COPYRIGHT           "Copyright (C) 2020-2022 Dmitry Lavygin <vdm.inbox@gmail.com>"
 #define PROXY_DOMAIN              "ulsu.tech"
 
 #define PROXY_VERSION_OPEN_SOURCE 0
@@ -50,7 +72,7 @@
 #define PROXY_VERSION_INTERNAL    3
 
 #define PROXY_VERSION_MAJOR       1
-#define PROXY_VERSION_MINOR       3
+#define PROXY_VERSION_MINOR       4
 #define PROXY_VERSION_TYPE        PROXY_VERSION_OPEN_SOURCE
 
 #define PROXY_STR_HELPER(x)       #x

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2022 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -40,9 +40,7 @@
 
 Win32xx::CString Proxy::getComputerName()
 {
-    DWORD size = 0;
-
-    GetComputerName(NULL, &size);
+    DWORD size = MAX_COMPUTERNAME_LENGTH + 1;
 
     Win32xx::CString result;
 

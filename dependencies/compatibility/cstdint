@@ -10,10 +10,14 @@
 
 #ifdef _STD_USING
  #undef _STD_USING
+  #define __STDC_LIMIT_MACROS
+  #define __STDC_CONSTANT_MACROS
   #include <stdint.h>
  #define _STD_USING
 
 #else /* _STD_USING */
+ #define __STDC_LIMIT_MACROS
+ #define __STDC_CONSTANT_MACROS
  #include <stdint.h>
 #endif /* _STD_USING */
 

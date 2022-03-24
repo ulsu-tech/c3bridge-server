@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2022 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -58,6 +58,7 @@ protected:
     virtual void OnFileExit();
     virtual void OnInitialUpdate();
     virtual BOOL OnHelp();
+    virtual LRESULT OnInitMenuPopup(UINT msg, WPARAM wparam, LPARAM lparam);
     virtual void PreCreate(CREATESTRUCT& cs);
     virtual LRESULT WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 

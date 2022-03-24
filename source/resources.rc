@@ -119,7 +119,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-#ifdef VS_RC_60   // For Visual Studio 6
+#ifdef RC_LEGACY
 IDW_MAIN                ICON                    "../resources/legacy.ico"
 #else
 IDW_MAIN                ICON                    "../resources/main.ico"
@@ -223,6 +223,8 @@ IDB_LOGO                BITMAP                  "../resources/logo.bmp"
 STRINGTABLE
 BEGIN
     IDW_MAIN                 "C3 Bridge Interface Server"
+    IDW_MAIN_ANSI            "C3 Bridge Interface Server (ANSI)"
+    IDW_MAIN_COMPAT          "C3 Bridge Interface Server (Compatible)"
 END
 
 STRINGTABLE

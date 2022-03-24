@@ -3,7 +3,7 @@
 The C3 Bridge Interface Server is a lightweight network application that allows remote clients to execute requests to the KUKA Cross 3 subsystem and return responses. The application provides advanced functionality and high performance.
 
 ## Features
-* Well-documented [application protocol](https://github.com/ulsu-tech/c3bridge-server/raw/master/documents/C3%20Bridge%20Interface%20Protocol%201.3.pdf). It is fully compatible with KukavarProxy protocol, which means that existing client solutions (RoboDK, ROS) can be used.
+* Well-documented [application protocol](http://c3.ulsu.tech/protocol/latest/). It is fully compatible with KukavarProxy protocol, which means that existing client solutions (RoboDK, ROS) can be used.
 * Executes more functions of the KUKA Cross 3 subsystem (in the future we hope to implement all available functions).
 * Controls the execution of a KRL program.
 * High performance. The software is written in C++ and can be compiled using both modern development tools and development tools of the past years (like Visual C++ 6.0).
@@ -15,8 +15,11 @@ The C3 Bridge Interface Server is a lightweight network application that allows 
 ## Changelog
 See the [document](CHANGELOG.md) for more information.
 
+## Website
+[HTTP://C3.ULSU.TECH/](http://c3.ulsu.tech/)
+
 ## License
-Copyright (c) 2020-2021 Dmitry Lavygin (vdm.inbox@gmail.com)
+Copyright (c) 2020-2022 Dmitry Lavygin (vdm.inbox@gmail.com)
 
 S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
 

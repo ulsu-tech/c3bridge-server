@@ -1,9 +1,26 @@
 # Changelog
 
+## [1.4.0] (Open Source) - 2022-03-24
+Bug Fix Release
+### Added
+  - C3 Bridge Interface Protocol version 1.4
+### Changed
+  - The old version of CMake (3.4) is now supported for building the project in Visual Studio .NET 2003
+  - The program versions are now divided:
+    * Primary (compiled with Visual Studio 2022), required Windows 7 and higher
+    * Compatible (compiled with Visual Studio .NET 2003), required Windows XP and higher
+    * ANSI (compiled with Visual Studio .NET 2003), required Windows 95 and higher
+### Fixed
+  - CommandFileWriteContent: integer overflow eliminated
+  - CommandFileReadContent: integer overflow eliminated
+
 ## [1.3.0] (Open Source) - 2021-06-06
 Bug Fix Release
 ### Fixed
   - CommandWriteMultiple now works correctly
+### Known issues
+  - CommandFileWriteContent may not work correctly due to integer overflow
+  - CommandFileReadContent may not work correctly due to integer overflow
 
 ## [1.2.0] (Open Source) - 2021-06-05
 ### Added

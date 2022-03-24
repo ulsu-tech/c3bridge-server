@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2022 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -272,6 +272,11 @@ BOOL MainWindow::OnHelp()
     }
 
     return TRUE;
+}
+
+LRESULT MainWindow::OnInitMenuPopup(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+    return CWnd::WndProcDefault(WM_INITMENUPOPUP, wparam, lparam);
 }
 
 void MainWindow::PreCreate(CREATESTRUCT& cs)

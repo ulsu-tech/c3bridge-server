@@ -1,0 +1,314 @@
+body {
+  background-color: #708090;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: 14pt;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: #0070C0;
+}
+
+a:hover {
+  color: #C07000;
+}
+
+#content {
+  background-color: #FFFFFF;
+  margin: 0 auto;
+  width: 800px;
+}
+
+.titlepage {
+  border-top: 10px solid #708090;
+  border-bottom: 10px solid #708090;
+  padding: 20px;
+  font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+  font-size: 18pt;
+  text-align: center;
+}
+
+.titlepage h1 {
+  margin: 100px 0 50px 0;
+  font-size: 28pt;
+}
+
+.titlepage p {
+  margin: 0;
+}
+
+.titlepage .credits {
+  margin: 100px 0;
+  font-weight: bold;
+}
+
+.titlepage .footer {
+  font-size: 12pt;
+  font-weight: bold;
+  letter-spacing: 0.65pt;
+}
+
+.page {
+  border-bottom: 10px solid #708090;
+  padding: 20px;
+  line-height: 1.5;
+}
+
+.page .small {
+  font-size: 12pt;
+}
+
+.page h1 {
+  margin: 0 0 30pt 0;
+  border-bottom: 2px solid black;
+  color: #FF6C2C;
+  font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+  font-size: 28pt;
+}
+
+.page h2 {
+  margin: 0;
+  color: #FF6C2C;
+  font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+  font-size: 18pt;
+}
+
+.page h3 {
+  margin: 0;
+  color: #FF6C2C;
+  font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+  font-size: 18pt;
+}
+
+.page h4 {
+  margin: 0;
+  color: #FF6C2C;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: 14pt;
+  font-weight: bold;
+}
+
+.page h1 a, .page h1 a:hover, .page h2 a, .page h2 a:hover, .page h3 a, .page h3 a:hover, .page h4 a, .page h4 a:hover {
+  color: #FF6C2C;
+  text-decoration: none;
+}
+
+.page h4 a, .page h4 a:hover {
+  font-weight: normal;
+}
+
+.page p {
+  margin: 0;
+}
+
+.page ol, .page ul {
+  margin: 0;
+  padding-left: 40px;
+}
+
+.page .left {
+  text-align: left;
+}
+
+.page .center {
+  text-align: center;
+}
+
+.page .right {
+  text-align: right;
+}
+
+.page .bold {
+  font-weight: bold;
+}
+
+.page .italic {
+  font-style: italic;
+}
+
+.page .normal {
+  font-weight: normal;
+  font-style: normal;
+}
+
+.page .code {
+  font-family: "Courier New", Courier, monospace;
+}
+
+.page .toc {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+  font-size: 14pt;
+}
+
+.page .toc a, .page .toc a:hover {
+  text-decoration: none;
+}
+
+.page .toc td {
+  padding: 2px;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.page .toc .leader {
+  background: url('../images/dot.gif') repeat-x 0 70%;
+  width: auto;
+}
+
+.page .toc .leader span {
+  padding-right: 2px;
+  background-color: #FFFFFF;
+}
+
+.page .table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.page .table .corner {
+  border-top: none;
+  border-left: none;
+  background-color: transparent;
+}
+
+.page .table th {
+  border: 1px solid #DADADA;
+  background-color: #2A3A5C;
+  color: white;
+  padding: 5px;
+  font-weight: bold;
+}
+
+.page .table td {
+  border: 1px solid #DADADA;
+  background-color: white;
+  padding: 5px;
+}
+
+.page .table .col-fit {
+  width: 1px;
+  white-space: nowrap;
+}
+
+.page .table .col-5 {
+  width: 5%;
+}
+
+.page .table .col-10 {
+  width: 10%;
+}
+
+.page .table .col-15 {
+  width: 15%;
+}
+
+.page .table .col-20 {
+  width: 20%;
+}
+
+.page .table .col-25 {
+  width: 25%;
+}
+
+.page .table .col-30 {
+  width: 30%;
+}
+
+.page .table .col-35 {
+  width: 35%;
+}
+
+.page .table .col-40 {
+  width: 40%;
+}
+
+.page .table .col-45 {
+  width: 45%;
+}
+
+.page .table .col-50 {
+  width: 50%;
+}
+
+.page .table .col-55 {
+  width: 55%;
+}
+
+.page .table .col-60 {
+  width: 60%;
+}
+
+.page .table .col-65 {
+  width: 65%;
+}
+
+.page .table .col-75 {
+  width: 75%;
+}
+
+.page .table .col-80 {
+  width: 80%;
+}
+
+.page .table .col-85 {
+  width: 85%;
+}
+
+.page .table .col-90 {
+  width: 90%;
+}
+
+.page .table .col-95 {
+  width: 95%;
+}
+
+.page .table .col-100 {
+  width: 100%;
+}
+
+.page .table .even td {
+  background-color: #EBF2F5;
+}
+
+.page .footer {
+  font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+  font-size: 10pt;
+  font-weight: bold;
+  letter-spacing: 0.65pt;
+  margin-top: 10px;
+  border-top: 2px solid #A9A9A9;
+  color: #A9A9A9;
+  width: 100%;
+}
+
+.page .footer a, .page .footer a:hover {
+  text-decoration: none;
+}
+
+.page .footer tr, .page .footer td {
+  padding: 0;
+}
+
+.page .footer .left {
+  text-align: right;
+  width: 45%;
+}
+
+.page .footer .center {
+  color: #000000;
+  font-size: 14pt;
+  text-align: center;
+}
+
+.page .footer .right {
+  text-align: left;
+  width: 20%;
+}
+
+.page .footer .tail {
+  text-align: right;
+  width: 25%;
+}

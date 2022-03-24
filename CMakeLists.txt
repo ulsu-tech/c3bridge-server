@@ -1,29 +1,46 @@
-cmake_minimum_required (VERSION 3.15)
+cmake_minimum_required (VERSION 3.4)
 
-set (PROJECT C3Bridge)
 set (ANSI OFF CACHE BOOL "Make ANSI version")
 set (CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 
-project (${PROJECT})
+project (C3Bridge)
 
 if (MSVC)
-	set_property (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT})
 	set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
 
 	if (MSVC_VERSION LESS 1600)
 		message (STATUS "Using compatibility <stdint.h> header for Visual Studio 2008 and earlier")
 		include_directories(${CMAKE_SOURCE_DIR}/dependencies/compatibility)
+		add_definitions (-DRC_LEGACY)
+		project (C3BCOMPT)
 	endif ()
+
+	set(CompilerFlags
+		CMAKE_CXX_FLAGS
+		CMAKE_CXX_FLAGS_DEBUG
+		CMAKE_CXX_FLAGS_RELEASE
+		CMAKE_C_FLAGS
+		CMAKE_C_FLAGS_DEBUG
+		CMAKE_C_FLAGS_RELEASE
+	)
+	foreach(CompilerFlag ${CompilerFlags})
+		string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+	endforeach()
 endif ()
 
 if (ANSI)
 	message (STATUS "Making ANSI version of the application")
-	remove_definitions (-D_UNICODE)
+	remove_definitions (-D_UNICODE -DUNICODE)
 	add_definitions (-D_MBCS)
+	project (C3BANSI)
 else ()
 	message (STATUS "Making UNICODE version of the application")
 	remove_definitions (-D_MBCS)
-	add_definitions (-D_UNICODE)
+	add_definitions (-D_UNICODE -DUNICODE)
+endif ()
+
+if (MSVC)
+	set_property (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 endif ()
 
 include_directories (${CMAKE_SOURCE_DIR}/dependencies/win32xx)
@@ -84,6 +101,8 @@ set (SOURCES_PROXY
 set (SOURCES_SYSTEM
 	source/main.cpp
 	source/resource.h
+	source/safe.cpp
+	source/safe.h
 	source/stdafx.cpp
 	source/stdafx.h
 	source/targetver.h
@@ -120,5 +139,5 @@ set (SOURCES
 	${SOURCES_SYSTEM}
 )
 
-add_executable (${PROJECT} WIN32 ${SOURCES} ${RESOURCES})
-target_link_libraries (${PROJECT} "comctl32.lib ws2_32.lib")
+add_executable (${PROJECT_NAME} WIN32 ${SOURCES} ${RESOURCES})
+target_link_libraries (${PROJECT_NAME} "comctl32.lib" "ws2_32.lib")

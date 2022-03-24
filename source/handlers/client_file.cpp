@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Dmitry Lavygin <vdm.inbox@gmail.com>
+ * Copyright (c) 2020-2022 Dmitry Lavygin <vdm.inbox@gmail.com>
  * S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
  * All rights reserved.
  *
@@ -41,6 +41,7 @@
 #include "messagebuilder.h"
 #include "messagereader.h"
 #include "log.h"
+#include "safe.h"
 
 
 void Client::handleFileDummy(MessageReader& stream, MessageBuilder& output)
@@ -401,7 +402,7 @@ void Client::handleFileWriteContent(MessageReader& stream,
 
                 if (size > 0 && total > 0 && offset < total)
                 {
-                    if (offset + size > total)
+                    if (!Safe::CheckAdd(offset, size) || offset + size > total)
                         size = total - offset;
 
                     ok = stream.getArray(&_fileOut[offset], size);
@@ -502,7 +503,7 @@ void Client::handleFileReadContent(MessageReader& stream,
 
                 if (size > 0 && total > 0 && offset < total)
                 {
-                    if (offset + size > total)
+                    if (!Safe::CheckAdd(offset, size) || (offset + size > total))
                         size = total - offset;
 
                     if (size > SafePayloadSize)
