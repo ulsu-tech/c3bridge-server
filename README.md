@@ -3,7 +3,7 @@
 The C3 Bridge Interface Server is a lightweight network application that allows remote clients to execute requests to the KUKA Cross 3 subsystem and return responses. The application provides advanced functionality and high performance.
 
 ## Features
-* Well-documented [application protocol](http://c3.ulsu.tech/protocol/latest/). It is fully compatible with KukavarProxy protocol, which means that existing client solutions (RoboDK, ROS) can be used.
+* Well-documented [application protocol](https://robodk.com/c3/protocol/latest/). It is fully compatible with KukavarProxy protocol, which means that existing client solutions (RoboDK, ROS) can be used.
 * Executes more functions of the KUKA Cross 3 subsystem (in the future we hope to implement all available functions).
 * Controls the execution of a KRL program.
 * High performance. The software is written in C++ and can be compiled using both modern development tools and development tools of the past years (like Visual C++ 6.0).
@@ -16,12 +16,10 @@ The C3 Bridge Interface Server is a lightweight network application that allows 
 See the [document](CHANGELOG.md) for more information.
 
 ## Website
-[HTTP://C3.ULSU.TECH/](http://c3.ulsu.tech/)
+[HTTPS://ROBODK.COM/C3](https://robodk.com/c3)
 
 ## License
-Copyright (c) 2020-2022 Dmitry Lavygin (vdm.inbox@gmail.com)
-
-S.P. Kapitsa Research Institute of Technology of Ulyanovsk State University.
+Copyright (c) 2020-2026 Dmitry Lavygin (vdm.inbox@gmail.com)
 
 All rights reserved.
 
@@ -34,8 +32,3 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
 IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-## Donate
-If you found this software useful, you can thank the author with donations via
-
-[![PayPal](https://github.com/ulsu-tech/c3bridge-server/raw/master/artwork/donate.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=vdm.inbox@gmail.com&lc=EN&item_name=C3BridgeInterface&no_note=0&currency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted) [![Yoo Money](https://github.com/ulsu-tech/c3bridge-server/raw/master/artwork/donate_yoo.png)](https://yoomoney.ru/to/4100111653323774)
